@@ -11,10 +11,19 @@ int HEIGHT = 480;
 int WIDTH = 640;
 bool PRESSED=false;
 
+namespace states
+{
+    const int MENU=0;
+    const int GAME=1;
+    const int GAMEOVER=2;
+
+    int STATE=MENU;
+}
+
 void setLetter(char ch)
 {
     glLineWidth(2);
-    glColor3ub(66,66,66);
+    glColor3ub(0x42,0x42,0x42);
     glPushMatrix();
     glTranslatef(WIDTH/2.0-50,HEIGHT-110,0);
     glutStrokeCharacter(GLUT_STROKE_ROMAN, (int)ch);
@@ -50,9 +59,7 @@ static void key(unsigned char key, int x, int y)
     switch (key)
     {
         case 27 :
-        case 'q':
-            exit(0);
-            break;
+        case 'q': exit(0);break;
 
     }
 
