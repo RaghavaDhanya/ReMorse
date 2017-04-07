@@ -11,7 +11,6 @@
 #include <iostream>
 int HEIGHT = 480;
 int WIDTH = 640;
-bool PRESSED=false;
 using namespace std;
 namespace Rstates
 {
@@ -25,8 +24,8 @@ namespace Rimages
 {
     const char* logoName="morse.png";
     vector<unsigned char> logo;
-    unsigned logoWidth=326;
-    unsigned logoHeight=326;
+    unsigned logoWidth=261;
+    unsigned logoHeight=261;
     void invert(vector<unsigned char> &img,const unsigned width,const unsigned height)
     {
         unsigned char *imagePtr = &img[0];
@@ -48,7 +47,7 @@ namespace Rimages
                 ++bottom;
             }
         }
-        }
+    }
     void loadImages()
     {
         int error;
@@ -63,6 +62,54 @@ namespace Rimages
     }
 
 }
+namespace Rkeys
+{
+    bool UP=false;
+    int ENTER=0;
+    static void key(unsigned char key, int x, int y)
+    {
+        //key down for normal keys
+        switch (key)
+        {
+            case 27 :
+            case 'q':
+                exit(0); break;
+            case 13:
+                ENTER++; break;
+
+        }
+
+        glutPostRedisplay();
+    }
+    static void keyup(unsigned char key, int x, int y)
+    {
+        //key up for normal keys
+        switch (key)
+        {
+        }
+    }
+    static void splkey(int key, int x, int y)
+    {
+        //key down for special keys
+        switch (key)
+        {
+            case GLUT_KEY_UP: UP=true; break;
+
+        }
+    }
+    static void splkeyup(int key, int x, int y)
+    {
+        //key up for special keys
+        switch (key)
+        {
+            case GLUT_KEY_UP: UP=false; break;
+
+        }
+    }
+
+
+}
+
 //Set a letter on top of screen, used during game loop
 void setLetter(char ch)
 {
@@ -76,14 +123,34 @@ void setLetter(char ch)
 }
 void menuLoop()
 {
+    if(Rkeys::ENTER>0)
+    {
+        Rkeys::ENTER=0;
+        Rstates::STATE=Rstates::GAME;
+        return;
+    }
+
     glLineWidth(5);
-    //glColor3ub(0x42,0x42,0x42);
+    glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
     glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse");
     glPopMatrix();
+
+    glLineWidth(2);
+    glColor3ub(0x42,0x42,0x42);
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-150,HEIGHT-150,0);
+    glScalef(0.1,.1,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press Enter to Start, press Q to quit");
+    glPopMatrix();
+
     glRasterPos2i(WIDTH/2-(Rimages::logoWidth/2),0);
     glDrawPixels(Rimages::logoWidth,Rimages::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::logo[0]);
+}
+void gameLoop()
+{
+    setLetter('R');
 }
 static void resize(int width, int height)
 {
@@ -109,48 +176,10 @@ static void display(void)
     {
     case Rstates::MENU:
         menuLoop();break;
+    case Rstates::GAME:
+        gameLoop();break;
     }
     glutSwapBuffers();
-}
-
-
-static void key(unsigned char key, int x, int y)
-{
-    //key down for normal keys
-    switch (key)
-    {
-        case 27 :
-        case 'q': exit(0);break;
-
-    }
-
-    glutPostRedisplay();
-}
-static void keyup(unsigned char key, int x, int y)
-{
-    //key up for normal keys
-    switch (key)
-    {
-
-    }
-}
-static void splkey(int key, int x, int y)
-{
-    //key down for special keys
-    switch (key)
-    {
-        case GLUT_KEY_UP: PRESSED=true; break;
-
-    }
-}
-static void splkeyup(int key, int x, int y)
-{
-    //key up for special keys
-    switch (key)
-    {
-        case GLUT_KEY_UP: PRESSED=false; break;
-
-    }
 }
 
 
@@ -174,10 +203,10 @@ int main(int argc, char *argv[])
 
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
-    glutKeyboardFunc(key);
-    glutKeyboardUpFunc(keyup);
-    glutSpecialFunc(splkey);
-    glutSpecialUpFunc(splkeyup);
+    glutKeyboardFunc(Rkeys::key);
+    glutKeyboardUpFunc(Rkeys::keyup);
+    glutSpecialFunc(Rkeys::splkey);
+    glutSpecialUpFunc(Rkeys::splkeyup);
     glutIdleFunc(idle);
     //Do anti alias
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -185,9 +214,9 @@ int main(int argc, char *argv[])
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POLYGON_SMOOTH);
-//    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE);
     //make key not repeat events on long press
-    glutSetKeyRepeat(0);
+    glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
     glutMainLoop();
 
