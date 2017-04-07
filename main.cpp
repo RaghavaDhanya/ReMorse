@@ -26,6 +26,11 @@ namespace Rimages
     vector<unsigned char> logo;
     unsigned logoWidth=261;
     unsigned logoHeight=261;
+    const char* samName[]={"sam01.png","sam02.png"};
+    vector<unsigned char> sam[2];
+    unsigned samWidth[]={110,110};
+    unsigned samHeight[]={186,186};
+
     void invert(vector<unsigned char> &img,const unsigned width,const unsigned height)
     {
         unsigned char *imagePtr = &img[0];
@@ -58,7 +63,20 @@ namespace Rimages
         }
         else
             invert(logo,logoWidth,logoHeight);
-
+        if((error=lodepng::decode(sam[0],samWidth[0],samHeight[0],samName[0])))
+        {
+            cout<<lodepng_error_text(error)<<endl;
+            exit(1);
+        }
+        else
+            invert(sam[0],samWidth[0],samHeight[0]);
+        if((error=lodepng::decode(sam[1],samWidth[1],samHeight[1],samName[1])))
+        {
+            cout<<lodepng_error_text(error)<<endl;
+            exit(1);
+        }
+        else
+            invert(sam[1],samWidth[1],samHeight[1]);
     }
 
 }
@@ -151,6 +169,10 @@ void menuLoop()
 void gameLoop()
 {
     setLetter('R');
+    int v=rand()%2;
+    glRasterPos2i(WIDTH/2-(Rimages::samWidth[v]/2),0);
+    glDrawPixels(Rimages::samWidth[v],Rimages::samHeight[v], GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::sam[v][0]);
+
 }
 static void resize(int width, int height)
 {
