@@ -1,4 +1,4 @@
-
+///////////////////////////////Requires opengl 1.2/////////////////////////////
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -9,8 +9,10 @@
 #include "lib/lodepng.h"
 #include "lib/lodepng.cpp"
 #include <iostream>
+#define GL_CLAMP_TO_EDGE 0x812F
 int HEIGHT = 480;
 int WIDTH = 640;
+GLuint texname;
 using namespace std;
 namespace Rstates
 {
@@ -128,11 +130,29 @@ namespace Rkeys
 
 }
 
+void setTexture()
+{
+    // should use a variable input to set specific texture
+    int v=rand()%2;
+    glGenTextures(1, &texname);
+    glBindTexture(GL_TEXTURE_2D, texname);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // without this texture darkens
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Rimages::samWidth[0], Rimages::samHeight[0],
+                0, GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::sam[v][0]);
+}
 //Set a letter on top of screen, used during game loop
 void setLetter(char ch)
 {
     glLineWidth(5);
     glColor3ub(0x42,0x42,0x42);
+    //push and pop is required in model view!
     glPushMatrix();
     glTranslatef(WIDTH/2.0-50,HEIGHT-110,0);
     glutStrokeCharacter(GLUT_STROKE_ROMAN, (int)ch);
@@ -169,9 +189,21 @@ void menuLoop()
 void gameLoop()
 {
     setLetter('R');
-    int v=rand()%2;
-    glRasterPos2i(WIDTH/2-(Rimages::samWidth[v]/2),0);
-    glDrawPixels(Rimages::samWidth[v],Rimages::samHeight[v], GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::sam[v][0]);
+    // enable texture.
+    // !!!!!!!!Very dangerous!!!!!!!. might affect other objects. disable before drawing other objects
+    glEnable(GL_TEXTURE_2D);
+    setTexture();
+    glPushMatrix();
+
+    // should use global box variables for drawing character quad
+    glBegin(GL_POLYGON);
+        glTexCoord2d(0,0);  glVertex2f(0,0);
+        glTexCoord2d(0,1);  glVertex2f(0,Rimages::samHeight[0]);
+        glTexCoord2d(1,1);  glVertex2f(Rimages::samWidth[0],Rimages::samHeight[0]);
+        glTexCoord2d(1,0);  glVertex2f(Rimages::samWidth[0],0);
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 
 }
 static void resize(int width, int height)
@@ -207,22 +239,30 @@ static void display(void)
 
 static void idle(void)
 {
+    //display opengl error for debugging
+    if (GLenum err = glGetError())
+    {
+      cerr << "OpenGL ERROR: " << gluErrorString(err) << endl;
+    }
+
     glutPostRedisplay();
 }
-
 
 /* Program entry point */
 
 int main(int argc, char *argv[])
 {
+    //should put this in init
     Rimages::loadImages();
+
     glutInit(&argc, argv);
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
     glutCreateWindow("ReMorse");
 
+    //set appropriate functions, may be we should put this in init as well
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
     glutKeyboardFunc(Rkeys::key);
@@ -230,13 +270,21 @@ int main(int argc, char *argv[])
     glutSpecialFunc(Rkeys::splkey);
     glutSpecialUpFunc(Rkeys::splkeyup);
     glutIdleFunc(idle);
-    //Do anti alias
+
+
+    ///////////////////////Do anti alias/////////////////////////
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    //smoothen lines n points
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+    //creates spaces (lines) bw polygon don't know how to correct
+    //glEnable(GL_POLYGON_SMOOTH);
+
+    //Somehow Multisample is not defined
     //glEnable(GL_MULTISAMPLE);
+    ////////////////////////end of anti alias////////////////////
+
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
