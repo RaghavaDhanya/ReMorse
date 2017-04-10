@@ -21,40 +21,113 @@ struct Config
 //Generic physical object
 class PhysicalObject
 {
-	protected:
-		Config config;
-		b2Body *body;
-		b2World *world;
-		b2BodyDef bodyDef;
-		b2PolygonShape shape;
-		b2FixtureDef fixtureDef;
+	//'Publicly' deriving subclasses will have these as private members
+    protected:
+        b2Body *body;
+        b2World *world;
+        b2BodyDef bodyDef;
+        b2PolygonShape shape;
+        b2FixtureDef fixtureDef;
 
-	public:
-		PhysicalObject(b2World *world) {
-			this->world = world;
-			config.x = config.y = config.angle = 0;
-		}
+    public:
+        PhysicalObject(b2World *world) 
+        {
+            this->world = world;
+        }
 
-		~PhysicalObject() {}
+        ~PhysicalObject() 
+        {
+            if(world)
+                world->DestroyBody(body);
+        }
 
-		void setX(int x) { config.x = x; }
+        Config getConfig() 
+        {
+            Config config;
 
-		void setY(int y) { config.y = y; }
+            if(body)
+            {
+                config.x = body->GetPosition().x;
+                config.y = body->GetPosition().y;
+                config.angle = body->GetAngle();
+            }
 
-		void setAngle(int angle) { config.angle = angle; }
-
-		void setConfig(Config config) { this->config = config; }
-
-		Config getConfig() { return config; }
+            return config; 
+        }
 };
 
 //Main player
 class Player: public PhysicalObject
 {
-	public:
-		Player(b2World *world): PhysicalObject(world) {}
+    static const int WIDTH = 1;
+    static const int HEIGHT = 1;
 
-		~Player() {}
+    static const int MAX_JUMP = 4;
+    static const int JUMP_IMPULSE = 100;   
+
+    //Replace with actual position of ground wall in game. Somehow.
+    static const int GROUND_POS = 2;   
+
+    bool inAir;     //To hover on long press. Check jump function
+
+    public:
+        Player(b2World *world, Config initConfig): PhysicalObject(world) 
+        {
+            inAir = false;
+
+            //Define body
+            bodyDef.type = b2_dynamicBody;
+            bodyDef.position.Set(initConfig.x, initConfig.y); //Starting position
+            bodyDef.angle = initConfig.angle;
+
+            //Create the body in the world
+            body = world->CreateBody(&bodyDef);
+
+            //Shape of fixture
+            shape.SetAsBox(WIDTH, HEIGHT);
+
+            //Define fixture with the shape
+            fixtureDef.shape = &shape;
+            fixtureDef.density = 1;
+
+            //Add fixture to body
+            body->CreateFixture(&fixtureDef);
+        }
+
+        ~Player() {}
+
+        /* When called with true, player will jump with initial impulse, and hover there.
+           When called with false, player will fall if hovering */
+        void setJump(bool jumpEnable)
+        {
+            /* Enforce max jumping height by applying a proporional force downwards */
+            if(body->GetPosition().y > MAX_JUMP)
+                body->ApplyForce(body->GetMass()*-body->GetLinearVelocity(), 
+                    body->GetWorldCenter(), true);
+
+            if(jumpEnable)
+            {
+                //Apply initial impulse to make player jump
+                if(!inAir)
+                {
+                    inAir = true;
+                    body->ApplyLinearImpulse(b2Vec2(0, JUMP_IMPULSE), body->GetWorldCenter(), true);
+                }
+
+                //If player begins falling down, apply force opposing gravity
+                //Consider setting velocity 0
+                else if(body->GetLinearVelocity().y < 0)
+                    body->ApplyForce(body->GetMass()*-world->GetGravity(), body->GetWorldCenter(), true);
+            }  
+
+            else
+            {
+                //Disable inAir on hitting ground
+                //Do this by getting position of ground wall
+                if(body->GetPosition().y < GROUND_POS)
+                    inAir = false;
+            }
+        }
 };
 
 //Obstacle
@@ -62,7 +135,27 @@ class Obstacle: public PhysicalObject
 {
 	public:
 		Obstacle(b2World *world): PhysicalObject(world) {}
+
 		~Obstacle() {}
+};
+
+//The ground, and possibly upper ceiling
+class Wall: public PhysicalObject
+{
+    static constexpr float WIDTH = 50.0f;
+    static constexpr float HEIGHT = 10.0f;
+    
+    public:
+        Wall(b2World *world, Config initConfig): PhysicalObject(world) 
+        {
+            bodyDef.position.Set(initConfig.x, initConfig.y);
+            body = world->CreateBody(&bodyDef);   
+
+            shape.SetAsBox(WIDTH, HEIGHT);
+            body->CreateFixture(&shape, 0.0f);
+        }
+
+        ~Wall() {}
 };
 
 //Manages obstacles
