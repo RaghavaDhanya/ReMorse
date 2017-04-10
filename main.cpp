@@ -1,17 +1,18 @@
 ///////////////////////////////Requires opengl 1.2/////////////////////////////
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#include <GLUT/freeglut.h>
 #else
 #include <GL/glut.h>
-#endif
 #include <GL/freeglut.h>
+#endif
 #include <stdlib.h>
 #include "lib/lodepng.h"
 #include "lib/lodepng.cpp"
 #include <iostream>
 #define GL_CLAMP_TO_EDGE 0x812F
-int HEIGHT = 480;
-int WIDTH = 640;
+int HEIGHT = 600;
+int WIDTH = 800;
 GLuint texname;
 using namespace std;
 namespace Rstates
@@ -173,6 +174,7 @@ void menuLoop()
     glPushMatrix();
     glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse");
+    //cout<<glutStrokeHeight(GLUT_STROKE_ROMAN)<<" "<<glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse")<<endl;
     glPopMatrix();
 
     glLineWidth(2);
@@ -197,14 +199,24 @@ void gameLoop()
 
     // should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
-        glTexCoord2d(0,0);  glVertex2f(0,0);
-        glTexCoord2d(0,1);  glVertex2f(0,Rimages::samHeight[0]);
-        glTexCoord2d(1,1);  glVertex2f(Rimages::samWidth[0],Rimages::samHeight[0]);
-        glTexCoord2d(1,0);  glVertex2f(Rimages::samWidth[0],0);
+        glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
+        glTexCoord2d(0,1);  glVertex2f(0+50,Rimages::samHeight[0]+50);
+        glTexCoord2d(1,1);  glVertex2f(Rimages::samWidth[0]+50,Rimages::samHeight[0]+50);
+        glTexCoord2d(1,0);  glVertex2f(Rimages::samWidth[0]+50,0+50);
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
-
+    //draw ground... use actual values later
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+        glColor3ub(0xF4,0x43,0x36);
+        glVertex2f(0,0);
+        glVertex2f(WIDTH,0);
+        glColor3ub(0xC6,0x28,0x28);
+        glVertex2f(WIDTH,50);
+        glVertex2f(0,50);
+    glEnd();
+    glPopMatrix();
 }
 static void resize(int width, int height)
 {
@@ -259,7 +271,7 @@ int main(int argc, char *argv[])
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-
+    glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
     glutCreateWindow("ReMorse");
 
     //set appropriate functions, may be we should put this in init as well
