@@ -5,6 +5,7 @@
 #else
 #include <GL/glut.h>
 #include <GL/freeglut.h>
+#include <GL/glext.h>
 #endif
 #include <stdlib.h>
 #include "lib/lodepng.h"
@@ -115,6 +116,7 @@ namespace Rkeys
         switch (key)
         {
             case GLUT_KEY_UP: UP=true; break;
+            case GLUT_KEY_F11:glutFullScreenToggle();break;
 
         }
     }
@@ -188,6 +190,7 @@ void menuLoop()
     glRasterPos2i(WIDTH/2-(Rimages::logoWidth/2),0);
     glDrawPixels(Rimages::logoWidth,Rimages::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::logo[0]);
 }
+
 void gameLoop()
 {
     setLetter('R');
@@ -268,9 +271,11 @@ int main(int argc, char *argv[])
     Rimages::loadImages();
 
     glutInit(&argc, argv);
+    //for anti alias
+    glutSetOption(GLUT_MULTISAMPLE, 8);
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE|GL_MULTISAMPLE);
     glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
     glutCreateWindow("ReMorse");
 
@@ -291,12 +296,9 @@ int main(int argc, char *argv[])
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     //creates spaces (lines) bw polygon don't know how to correct
-    //glEnable(GL_POLYGON_SMOOTH);
-
-    //Somehow Multisample is not defined
-    //glEnable(GL_MULTISAMPLE);
+    glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_MULTISAMPLE);
     ////////////////////////end of anti alias////////////////////
-
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
