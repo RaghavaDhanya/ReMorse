@@ -130,13 +130,48 @@ class Player: public PhysicalObject
         }
 };
 
-//Obstacle
+//One triangular obstacle. ObstacleManager creates and handles these.
+//Position refers to midpoint of base
 class Obstacle: public PhysicalObject
 {
-	public:
-		Obstacle(b2World *world): PhysicalObject(world) {}
+    int base;
+    int height;
 
-		~Obstacle() {}
+    public:
+        Obstacle(b2World *world, int base, int height, Config initConfig): PhysicalObject(world) 
+        {
+            this->base= base;
+            this->height = height;
+
+            //Define body
+            bodyDef.type = b2_kinematicBody;
+            bodyDef.position.Set(initConfig.x, initConfig.y);
+            bodyDef.angle = initConfig.angle;
+
+            //Create the body in the world
+            body = world->CreateBody(&bodyDef);
+
+            //Triangle fixture vertices
+            b2Vec2 vertices[3];
+            vertices[0].Set(initConfig.x - (base/2), initConfig.y);
+            vertices[1].Set(initConfig.x, initConfig.y + height);
+            vertices[2].Set(initConfig.x + (base/2), initConfig.y);
+            shape.Set(vertices, 3);
+
+            //Define fixture with the shape
+            fixtureDef.shape = &shape;
+            fixtureDef.density = 1;
+
+            //Add fixture to body
+            body->CreateFixture(&fixtureDef);
+        }
+
+        ~Obstacle() {}
+
+        void setSpeed(int speed)
+        {
+            body->SetLinearVelocity(b2Vec2(-speed, 0));
+        }
 };
 
 //The ground, and possibly upper ceiling
