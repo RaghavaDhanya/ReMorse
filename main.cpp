@@ -262,7 +262,19 @@ static void idle(void)
 
     glutPostRedisplay();
 }
+void antialias()
+{
 
+    ///////////////////////Do anti alias/////////////////////////
+    glutSetOption(GLUT_MULTISAMPLE, 8);
+    //smoothen lines n points
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    //creates spaces (lines) bw polygon if multi sample does not work
+    glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_MULTISAMPLE);
+    ////////////////////////end of anti alias////////////////////
+}
 /* Program entry point */
 
 int main(int argc, char *argv[])
@@ -272,12 +284,21 @@ int main(int argc, char *argv[])
 
     glutInit(&argc, argv);
     //for anti alias
-    glutSetOption(GLUT_MULTISAMPLE, 8);
+
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE|GL_MULTISAMPLE);
+    if(!glutGet(GLUT_DISPLAY_MODE_POSSIBLE))
+    {
+        //fallback if multisample is not possible
+        glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE);
+    }
+    else antialias();
     glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
     glutCreateWindow("ReMorse");
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
     //set appropriate functions, may be we should put this in init as well
     glutReshapeFunc(resize);
@@ -289,16 +310,6 @@ int main(int argc, char *argv[])
     glutIdleFunc(idle);
 
 
-    ///////////////////////Do anti alias/////////////////////////
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    //smoothen lines n points
-    glEnable(GL_POINT_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-    //creates spaces (lines) bw polygon don't know how to correct
-    glEnable(GL_POLYGON_SMOOTH);
-    glEnable(GL_MULTISAMPLE);
-    ////////////////////////end of anti alias////////////////////
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
