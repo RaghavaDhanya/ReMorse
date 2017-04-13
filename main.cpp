@@ -2,6 +2,7 @@
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #include <GLUT/freeglut.h>
+#include <GLUT/glext.h>
 #else
 #include <GL/glut.h>
 #include <GL/freeglut.h>
@@ -11,11 +12,14 @@
 #include "lib/lodepng.h"
 #include "lib/lodepng.cpp"
 #include <iostream>
-#define GL_CLAMP_TO_EDGE 0x812F
 int HEIGHT = 600;
 int WIDTH = 800;
 GLuint texname;
 using namespace std;
+namespace settings
+{
+	bool ANTIALIAS=true;
+}
 namespace Rstates
 {
     const int MENU=0;
@@ -194,8 +198,8 @@ void menuLoop()
 void gameLoop()
 {
     setLetter('R');
-    // enable texture.
-    // !!!!!!!!Very dangerous!!!!!!!. might affect other objects. disable before drawing other objects
+    /* enable texture.
+    !!!!!!!!Very dangerous!!!!!!!. might affect other objects. disable before drawing other objects */
     glEnable(GL_TEXTURE_2D);
     setTexture();
     glPushMatrix();
@@ -264,16 +268,25 @@ static void idle(void)
 }
 void antialias()
 {
-
-    ///////////////////////Do anti alias/////////////////////////
-    glutSetOption(GLUT_MULTISAMPLE, 8);
-    //smoothen lines n points
-    glEnable(GL_POINT_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
-    //creates spaces (lines) bw polygon if multi sample does not work
-    glEnable(GL_POLYGON_SMOOTH);
-    glEnable(GL_MULTISAMPLE);
-    ////////////////////////end of anti alias////////////////////
+	if(settings::ANTIALIAS)
+	{
+	    ///////////////////////Do anti alias/////////////////////////
+	    //creates spaces (lines) bw polygon if multi sample does not work
+	    glEnable(GL_POLYGON_SMOOTH);
+	    //not sure enabling again is required
+	    glEnable(GL_MULTISAMPLE);
+	    ////////////////////////end of anti alias////////////////////
+	    GLint iMultiSample = 0;
+        GLint iNumSamples = 0;
+        glGetIntegerv(GL_SAMPLE_BUFFERS, &iMultiSample);
+        glGetIntegerv(GL_SAMPLES, &iNumSamples);
+        printf("MSAA on, GL_SAMPLE_BUFFERS = %d, GL_SAMPLES = %d\n", iMultiSample, iNumSamples);
+	}
+	else
+    {
+        glDisable(GL_MULTISAMPLE);
+        printf("MSAA off\n");
+    }
 }
 /* Program entry point */
 
@@ -281,25 +294,27 @@ int main(int argc, char *argv[])
 {
     //should put this in init
     Rimages::loadImages();
-
     glutInit(&argc, argv);
-    //for anti alias
-
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE|GL_MULTISAMPLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GL_MULTISAMPLE);
     if(!glutGet(GLUT_DISPLAY_MODE_POSSIBLE))
     {
         //fallback if multisample is not possible
         glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE);
+        settings::ANTIALIAS=false;
     }
-    else antialias();
+    else
+        glutSetOption(GLUT_MULTISAMPLE, 8);
     glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
     glutCreateWindow("ReMorse");
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-
+ 	/*smoothen lines n points, doesn't seem to get affected by MULTISAMPLE.
+ 	works only if called after the BlendFunc*/
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    antialias();
     //set appropriate functions, may be we should put this in init as well
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
@@ -308,8 +323,6 @@ int main(int argc, char *argv[])
     glutSpecialFunc(Rkeys::splkey);
     glutSpecialUpFunc(Rkeys::splkeyup);
     glutIdleFunc(idle);
-
-
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
