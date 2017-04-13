@@ -1,4 +1,4 @@
 language: cpp
 compiler: gcc
 install: sudo apt-get install freeglut3-dev
-script: g++ main.cpp -lGL -GLU -lglut
+script: g++ main.cpp -lGL -lGLU -lglut
