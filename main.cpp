@@ -9,6 +9,7 @@
 #include <GL/glext.h>
 #endif
 #include <stdlib.h>
+#include <cmath>
 #include "lib/lodepng.h"
 #include "lib/lodepng.cpp"
 #include <iostream>
@@ -16,11 +17,11 @@ int HEIGHT = 600;
 int WIDTH = 800;
 GLuint texname;
 using namespace std;
-namespace settings
+namespace R_settings
 {
 	bool ANTIALIAS=true;
 }
-namespace Rstates
+namespace R_states
 {
     const int MENU=0;
     const int GAME=1;
@@ -28,7 +29,7 @@ namespace Rstates
 
     int STATE=MENU;
 }
-namespace Rimages
+namespace R_images
 {
     const char* logoName="morse.png";
     vector<unsigned char> logo;
@@ -46,7 +47,6 @@ namespace Rimages
         unsigned char *bottom = NULL;
         unsigned char temp = 0;
         for( int h = 0; h <(int) height/2; ++h )
-
         {
 
             top = imagePtr + h * width * 4;
@@ -88,7 +88,7 @@ namespace Rimages
     }
 
 }
-namespace Rkeys
+namespace R_keys
 {
     bool UP=false;
     int ENTER=0;
@@ -137,6 +137,37 @@ namespace Rkeys
 
 }
 
+namespace R_mouse
+{
+    void menu_mouse(int button,int state,int x,int y)
+    {
+        if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN)
+        {
+            printf("LEFT DOWN at (%d,%d)\n",x,y);
+        }
+    }
+    static void mouse(int button,int state,int x,int y)
+    {
+        /*
+                    Our co-ordinate system || Mouse co-ordinate system
+            +HEIGHT ^                      ||        x+    +WIDTH
+                    |                      ||   ----------->
+                  +y|                      ||   |
+                    |                      || +y|
+                    ---------->            ||   |
+                   0    x+    +WIDTH       ||   v +HEIGHT
+
+                    So we need to translate the point(x,y) to our co-ordinate system
+        */
+        y=abs(y-HEIGHT);
+        switch(R_states::STATE)
+        {
+            case R_states::MENU:
+                menu_mouse(button,state,x,y);
+
+        }
+    }
+}
 void setTexture()
 {
     // should use a variable input to set specific texture
@@ -151,8 +182,8 @@ void setTexture()
     // without this texture darkens
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Rimages::samWidth[0], Rimages::samHeight[0],
-                0, GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::sam[v][0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, R_images::samWidth[0], R_images::samHeight[0],
+                0, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::sam[v][0]);
 }
 //Set a letter on top of screen, used during game loop
 void setLetter(char ch)
@@ -168,10 +199,10 @@ void setLetter(char ch)
 }
 void menuLoop()
 {
-    if(Rkeys::ENTER>0)
+    if(R_keys::ENTER>0)
     {
-        Rkeys::ENTER=0;
-        Rstates::STATE=Rstates::GAME;
+        R_keys::ENTER=0;
+        R_states::STATE=R_states::GAME;
         return;
     }
 
@@ -191,8 +222,8 @@ void menuLoop()
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press Enter to Start, press Q to quit");
     glPopMatrix();
 
-    glRasterPos2i(WIDTH/2-(Rimages::logoWidth/2),0);
-    glDrawPixels(Rimages::logoWidth,Rimages::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &Rimages::logo[0]);
+    glRasterPos2i(WIDTH/2-(R_images::logoWidth/2),0);
+    glDrawPixels(R_images::logoWidth,R_images::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::logo[0]);
 }
 
 void gameLoop()
@@ -207,9 +238,9 @@ void gameLoop()
     // should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
         glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
-        glTexCoord2d(0,1);  glVertex2f(0+50,Rimages::samHeight[0]+50);
-        glTexCoord2d(1,1);  glVertex2f(Rimages::samWidth[0]+50,Rimages::samHeight[0]+50);
-        glTexCoord2d(1,0);  glVertex2f(Rimages::samWidth[0]+50,0+50);
+        glTexCoord2d(0,1);  glVertex2f(0+50,R_images::samHeight[0]+50);
+        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
+        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
@@ -245,11 +276,11 @@ static void display(void)
     glLoadIdentity();
     //Draw stuff here
     //setLetter('R');
-    switch(Rstates::STATE)
+    switch(R_states::STATE)
     {
-    case Rstates::MENU:
+    case R_states::MENU:
         menuLoop();break;
-    case Rstates::GAME:
+    case R_states::GAME:
         gameLoop();break;
     }
     glutSwapBuffers();
@@ -268,7 +299,7 @@ static void idle(void)
 }
 void antialias()
 {
-	if(settings::ANTIALIAS)
+	if(R_settings::ANTIALIAS)
 	{
 	    ///////////////////////Do anti alias/////////////////////////
 	    //creates spaces (lines) bw polygon if multi sample does not work
@@ -293,7 +324,7 @@ void antialias()
 int main(int argc, char *argv[])
 {
     //should put this in init
-    Rimages::loadImages();
+    R_images::loadImages();
     glutInit(&argc, argv);
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
@@ -302,7 +333,7 @@ int main(int argc, char *argv[])
     {
         //fallback if multisample is not possible
         glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE);
-        settings::ANTIALIAS=false;
+        R_settings::ANTIALIAS=false;
     }
     else
         glutSetOption(GLUT_MULTISAMPLE, 8);
@@ -318,10 +349,11 @@ int main(int argc, char *argv[])
     //set appropriate functions, may be we should put this in init as well
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
-    glutKeyboardFunc(Rkeys::key);
-    glutKeyboardUpFunc(Rkeys::keyup);
-    glutSpecialFunc(Rkeys::splkey);
-    glutSpecialUpFunc(Rkeys::splkeyup);
+    glutKeyboardFunc(R_keys::key);
+    glutKeyboardUpFunc(R_keys::keyup);
+    glutSpecialFunc(R_keys::splkey);
+    glutSpecialUpFunc(R_keys::splkeyup);
+    glutMouseFunc(R_mouse::mouse);
     glutIdleFunc(idle);
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
