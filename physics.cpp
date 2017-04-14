@@ -11,6 +11,8 @@ using namespace std;
    They move horizontally towards the player.
 */
 
+string letterToMorse(char let);
+
 //Hold position and angle data
 struct Config
 {
