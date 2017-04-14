@@ -16,6 +16,7 @@
 int HEIGHT = 600;
 int WIDTH = 800;
 GLuint texname;
+int frame=0,time,timebase=0;
 using namespace std;
 namespace R_settings
 {
@@ -92,45 +93,96 @@ namespace R_keys
 {
     bool UP=false;
     int ENTER=0;
-    static void key(unsigned char key, int x, int y)
+    void menu_key(unsigned char key, int x, int y)
     {
-        //key down for normal keys
         switch (key)
         {
             case 27 :
             case 'q':
                 exit(0); break;
             case 13:
-                ENTER++; break;
+                R_states::STATE=R_states::GAME; break;
 
         }
+    }
+    void menu_splkey(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+            case GLUT_KEY_F11:glutFullScreenToggle();break;
+        }
+    }
+    void game_key(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+        }
+    }
+    void game_keyup(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+        }
+    }
+    void game_splkey(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+             case GLUT_KEY_UP: UP=true; break;
+             case GLUT_KEY_F11:glutFullScreenToggle();break;
+        }
+    }
+     void game_splkeyup(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+             case GLUT_KEY_UP: UP=false; break;
+        }
+    }
+    static void key(unsigned char key, int x, int y)
+    {
+        //key down for normal keys
+        switch(R_states::STATE)
+        {
+            case R_states::MENU:
+                            menu_key(key,x,y);break;
+            case R_states::GAME:
+                            game_key(key,x,y);break;
+        }
 
-        glutPostRedisplay();
+        //glutPostRedisplay();
     }
     static void keyup(unsigned char key, int x, int y)
     {
         //key up for normal keys
-        switch (key)
+        switch(R_states::STATE)
         {
+            case R_states::MENU:
+                            break;
+            case R_states::GAME:
+                            game_keyup(key,x,y);break;
         }
     }
     static void splkey(int key, int x, int y)
     {
         //key down for special keys
-        switch (key)
+        switch(R_states::STATE)
         {
-            case GLUT_KEY_UP: UP=true; break;
-            case GLUT_KEY_F11:glutFullScreenToggle();break;
-
+            case R_states::MENU:
+                            menu_splkey(key,x,y);break;
+            case R_states::GAME:
+                            game_splkey(key,x,y);break;
         }
     }
     static void splkeyup(int key, int x, int y)
     {
         //key up for special keys
-        switch (key)
+        switch(R_states::STATE)
         {
-            case GLUT_KEY_UP: UP=false; break;
-
+            case R_states::MENU:
+                            break;
+            case R_states::GAME:
+                            game_splkeyup(key,x,y);break;
         }
     }
 
@@ -150,7 +202,7 @@ namespace R_mouse
     {
         /*
                     Our co-ordinate system || Mouse co-ordinate system
-            +HEIGHT ^                      ||        x+    +WIDTH
+            +HEIGHT ^                      ||   0    x+    +WIDTH
                     |                      ||   ----------->
                   +y|                      ||   |
                     |                      || +y|
@@ -199,13 +251,13 @@ void setLetter(char ch)
 }
 void menuLoop()
 {
-    if(R_keys::ENTER>0)
-    {
-        R_keys::ENTER=0;
-        R_states::STATE=R_states::GAME;
-        return;
-    }
-
+//    if(R_keys::ENTER>0)
+//    {
+//        R_keys::ENTER=0;
+//        R_states::STATE=R_states::GAME;
+//        return;
+//    }
+    //Thickness of font
     glLineWidth(5);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
@@ -214,16 +266,19 @@ void menuLoop()
     //cout<<glutStrokeHeight(GLUT_STROKE_ROMAN)<<" "<<glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse")<<endl;
     glPopMatrix();
 
+    //Thickness of font
     glLineWidth(2);
     glColor3ub(0x42,0x42,0x42);
     glPushMatrix();
     glTranslatef(WIDTH/2.0-150,HEIGHT-150,0);
-    glScalef(0.1,.1,0);
+    glScalef(.1f,.1f,0.0f);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press Enter to Start, press Q to quit");
     glPopMatrix();
 
+    glPushMatrix();
     glRasterPos2i(WIDTH/2-(R_images::logoWidth/2),0);
     glDrawPixels(R_images::logoWidth,R_images::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::logo[0]);
+    glPopMatrix();
 }
 
 void gameLoop()
@@ -294,7 +349,14 @@ static void idle(void)
     {
       cerr << "OpenGL ERROR: " << gluErrorString(err) << endl;
     }
-
+    frame++;
+	time=glutGet(GLUT_ELAPSED_TIME);
+	if (time - timebase > 1000) {
+		printf("FPS:%4.2f\n",
+			frame*1000.0/(time-timebase));
+		timebase = time;
+		frame = 0;
+	}
     glutPostRedisplay();
 }
 void antialias()
