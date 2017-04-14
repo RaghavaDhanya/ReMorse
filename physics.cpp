@@ -123,54 +123,10 @@ class Player: public PhysicalObject
             else
             {
                 //Disable inAir on hitting ground
-                //Do this by getting position of ground wall
+                //TODO: Do this by getting position of ground wall
                 if(body->GetPosition().y < GROUND_POS)
                     inAir = false;
             }
-        }
-};
-
-//One triangular obstacle. ObstacleManager creates and handles these.
-//Position refers to midpoint of base
-class Obstacle: public PhysicalObject
-{
-    int base;
-    int height;
-
-    public:
-        Obstacle(b2World *world, int base, int height, Config initConfig): PhysicalObject(world) 
-        {
-            this->base= base;
-            this->height = height;
-
-            //Define body
-            bodyDef.type = b2_kinematicBody;
-            bodyDef.position.Set(initConfig.x, initConfig.y);
-            bodyDef.angle = initConfig.angle;
-
-            //Create the body in the world
-            body = world->CreateBody(&bodyDef);
-
-            //Triangle fixture vertices
-            b2Vec2 vertices[3];
-            vertices[0].Set(initConfig.x - (base/2), initConfig.y);
-            vertices[1].Set(initConfig.x, initConfig.y + height);
-            vertices[2].Set(initConfig.x + (base/2), initConfig.y);
-            shape.Set(vertices, 3);
-
-            //Define fixture with the shape
-            fixtureDef.shape = &shape;
-            fixtureDef.density = 1;
-
-            //Add fixture to body
-            body->CreateFixture(&fixtureDef);
-        }
-
-        ~Obstacle() {}
-
-        void setSpeed(int speed)
-        {
-            body->SetLinearVelocity(b2Vec2(-speed, 0));
         }
 };
 
@@ -193,6 +149,111 @@ class Wall: public PhysicalObject
         ~Wall() {}
 };
 
+//Represents a single letter. 
+//Holds a set of bodies corresponding to the Morse of the letter
+class Obstacle
+{
+    //Max of 5 characters in a Morse letter
+    //Worst case of three obstacles for each
+    static const int MAX_BODIES = 15;
+
+    /* Use only even numbers for width and height 
+    Because we use integers and there is a division by 2 involved */
+
+    //Width and height for dot obstacle
+    static const int DOT_WIDTH = 6;
+    static const int DOT_HEIGHT = 6;
+
+    //Width and height for dash obstacle
+    static const int DASH_WIDTH = 4;
+    static const int DASH_HEIGHT = 4;
+
+    //TODO: Make this variable
+    static const int speed = 5;     //Speed of each obstacles
+    static const int spacing = 4;   //Spacing between obstacles
+
+    char curLetter;                     //The letter represented by this obstacle 
+    
+    b2World *world;
+    b2Body *bodies[MAX_BODIES];
+
+    //Creates a triangular kinematic body in bodies[] array at the index
+    void createBody(int index, int base, int height, Config initConfig)
+    {
+        //Define body
+        b2BodyDef def;
+        def.type = b2_kinematicBody;
+        def.position.Set(initConfig.x, initConfig.y);
+        def.angle = initConfig.angle;
+
+        //Create the body in the world
+        bodies[index] = world->CreateBody(&def);
+
+        //Triangle fixture vertices relative to BodyDef position as origin
+        b2Vec2 vertices[3];
+        vertices[0].Set(0, 0); //Bottom left
+        vertices[1].Set((base/2), height);   //Top
+        vertices[2].Set(base, 0); //Bottom right
+
+        //Triangle shape
+        b2PolygonShape shape;
+        shape.Set(vertices, 3);
+
+        //Define fixture with the shape
+        b2FixtureDef fixtureDef;
+        fixtureDef.shape = &shape;
+        fixtureDef.density = 1;
+
+        //Add fixture to body
+        bodies[index]->CreateFixture(&fixtureDef);
+        bodies[index]->SetLinearVelocity({-speed, 0});
+    }
+
+    void destroyBody(int index)
+    {
+        if(bodies[index])
+            world->DestroyBody(bodies[index]);
+    }
+
+    public:
+        Obstacle(b2World *world) 
+        {
+            this->world = world;
+        }
+
+        ~Obstacle() {}
+
+        void setLetter(char letter)
+        {
+            curLetter = letter;
+
+            for(int i = 0; i < MAX_BODIES; ++i)
+                destroyBody(i);
+
+            string morseText = letterToMorse(letter);
+
+            int pos = 0;
+            
+            for(int i = 0; i < morseText.length(); ++i)
+            {
+                if(morseText[i] == '.')
+                {
+                    createBody(i, DOT_WIDTH, DOT_HEIGHT, {pos, 0, 0});
+                    pos += DOT_WIDTH;
+                }
+                else 
+                    //Create 3 small bodies for a dash
+                    for(int k = 0; k < 3; ++k)
+                    {
+                        createBody(i, DASH_WIDTH, DASH_HEIGHT, {pos, 0, 0});
+                        pos += DASH_WIDTH;
+                    }
+
+                pos += spacing;
+            } 
+        }
+};
+
 //Manages obstacles
 class ObstacleManager
 {
@@ -201,9 +262,37 @@ class ObstacleManager
 		~ObstacleManager() {}
 };
 
+//Returns Morse string of '.' and '-' for given letter
+//TODO: Add morse code for numbers
+string letterToMorse(char let)
+{
+	//Reference: https://en.wikipedia.org/wiki/Morse_code#/media/File:International_Morse_Code.svg
+	switch(let=toupper(let))
+	{
+		case 'A': return ".-";		case 'B': return "-...";
+		case 'C': return "-.-.";	case 'D': return "-..";
+		case 'E': return ".";		case 'F': return "..-.";
+		case 'G': return "--.";		case 'H': return "....";
+		case 'I': return "..";		case 'J': return ".---";
+		case 'K': return "-.-";		case 'L': return ".-..";
+		case 'M': return "--";		case 'N': return "-.";
+		case 'O': return "---";		case 'P': return ".--.";
+		case 'Q': return "--.-";	case 'R': return ".-.";
+		case 'S': return "...";		case 'T': return "-";
+		case 'U': return "..-";		case 'V': return "...-";
+		case 'W': return ".--";		case 'X': return "-..-";
+		case 'Y': return "-.--";	case 'Z': return "--..";
+	}
+	
+	return "0";
+}
+
 int main()
 {
-	
+	for(char l='a'; l<='z'; ++l)
+	{
+		cout<<l<<": "<<letterToMorse(l)<<"\n";
+	}
 	cout<<"\nFin\n";
 	return 0;
 }
