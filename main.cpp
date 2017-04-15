@@ -16,17 +16,18 @@
 int HEIGHT = 600;
 int WIDTH = 800;
 GLuint texname;
-int frame=0,time,timebase=0;
+int frame=0,curtime,timebase=0;
 using namespace std;
 namespace R_settings
 {
-	bool ANTIALIAS=true;
+    bool ANTIALIAS=true;
 }
 namespace R_states
 {
     const int MENU=0;
     const int GAME=1;
     const int GAMEOVER=2;
+    const int PAUSE=3;
 
     int STATE=MENU;
 }
@@ -67,21 +68,21 @@ namespace R_images
         int error;
         if((error=lodepng::decode(logo,logoWidth,logoHeight,logoName)))
         {
-            cout<<lodepng_error_text(error)<<endl;
+            cout<<logoName<<":"<<lodepng_error_text(error)<<endl;
             exit(1);
         }
         else
             invert(logo,logoWidth,logoHeight);
         if((error=lodepng::decode(sam[0],samWidth[0],samHeight[0],samName[0])))
         {
-            cout<<lodepng_error_text(error)<<endl;
+            cout<<samName[0]<<":"<<lodepng_error_text(error)<<endl;
             exit(1);
         }
         else
             invert(sam[0],samWidth[0],samHeight[0]);
         if((error=lodepng::decode(sam[1],samWidth[1],samHeight[1],samName[1])))
         {
-            cout<<lodepng_error_text(error)<<endl;
+            cout<<samName[1]<<":"<<lodepng_error_text(error)<<endl;
             exit(1);
         }
         else
@@ -92,16 +93,22 @@ namespace R_images
 namespace R_keys
 {
     bool UP=false;
-    int ENTER=0;
+
+    int CURSOR=0;
     void menu_key(unsigned char key, int x, int y)
     {
         switch (key)
         {
-            case 27 :
-            case 'q':
-                exit(0); break;
             case 13:
-                R_states::STATE=R_states::GAME; break;
+                switch(CURSOR)
+                {
+                    case 0:
+                        R_states::STATE=R_states::GAME; break;
+                    case 1:
+                        exit(0); break;
+                }
+                CURSOR=0;
+                break;
 
         }
     }
@@ -110,12 +117,58 @@ namespace R_keys
         switch (key)
         {
             case GLUT_KEY_F11:glutFullScreenToggle();break;
+            case GLUT_KEY_UP:
+                            if(CURSOR>0)
+                                CURSOR--;
+                            else CURSOR=1;
+                            break;
+            case GLUT_KEY_DOWN:
+                             CURSOR=(CURSOR+1)%2; break;
+        }
+    }
+    void pause_key(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+            case 27 :
+            case 'q':
+            case 'Q':
+                R_states::STATE=R_states::GAME; break;
+            case 13:
+                switch(CURSOR)
+                {
+                    case 0:
+                        R_states::STATE=R_states::GAME; break;
+                    case 1:
+                        R_states::STATE=R_states::MENU; break;
+                }
+                CURSOR=0;
+                break;
+
+        }
+    }
+    void pause_splkey(unsigned char key, int x, int y)
+    {
+        switch (key)
+        {
+            case GLUT_KEY_F11:glutFullScreenToggle();break;
+            case GLUT_KEY_UP:
+                            if(CURSOR>0)
+                                CURSOR--;
+                            else CURSOR=1;
+                            break;
+            case GLUT_KEY_DOWN:
+                             CURSOR=(CURSOR+1)%2; break;
         }
     }
     void game_key(unsigned char key, int x, int y)
     {
         switch (key)
         {
+            case 27 :
+            case 'q':
+            case 'Q':
+                R_states::STATE=R_states::PAUSE; break;
         }
     }
     void game_keyup(unsigned char key, int x, int y)
@@ -148,6 +201,8 @@ namespace R_keys
                             menu_key(key,x,y);break;
             case R_states::GAME:
                             game_key(key,x,y);break;
+            case R_states::PAUSE:
+                            pause_key(key,x,y);break;
         }
 
         //glutPostRedisplay();
@@ -161,6 +216,8 @@ namespace R_keys
                             break;
             case R_states::GAME:
                             game_keyup(key,x,y);break;
+            case R_states::PAUSE:
+                            break;
         }
     }
     static void splkey(int key, int x, int y)
@@ -172,6 +229,8 @@ namespace R_keys
                             menu_splkey(key,x,y);break;
             case R_states::GAME:
                             game_splkey(key,x,y);break;
+            case R_states::PAUSE:
+                            pause_splkey(key,x,y);break;
         }
     }
     static void splkeyup(int key, int x, int y)
@@ -183,43 +242,15 @@ namespace R_keys
                             break;
             case R_states::GAME:
                             game_splkeyup(key,x,y);break;
+            case R_states::PAUSE:
+                            break;
         }
     }
 
 
 }
 
-namespace R_mouse
-{
-    void menu_mouse(int button,int state,int x,int y)
-    {
-        if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN)
-        {
-            printf("LEFT DOWN at (%d,%d)\n",x,y);
-        }
-    }
-    static void mouse(int button,int state,int x,int y)
-    {
-        /*
-                    Our co-ordinate system || Mouse co-ordinate system
-            +HEIGHT ^                      ||   0    x+    +WIDTH
-                    |                      ||   ----------->
-                  +y|                      ||   |
-                    |                      || +y|
-                    ---------->            ||   |
-                   0    x+    +WIDTH       ||   v +HEIGHT
 
-                    So we need to translate the point(x,y) to our co-ordinate system
-        */
-        y=abs(y-HEIGHT);
-        switch(R_states::STATE)
-        {
-            case R_states::MENU:
-                menu_mouse(button,state,x,y);
-
-        }
-    }
-}
 void setTexture()
 {
     // should use a variable input to set specific texture
@@ -237,10 +268,13 @@ void setTexture()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, R_images::samWidth[0], R_images::samHeight[0],
                 0, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::sam[v][0]);
 }
-//Set a letter on top of screen, used during game loop
+/**
+    Set a letter on top of screen, used during game loop
+    @param ch specifies the character to be displayed
+*/
 void setLetter(char ch)
 {
-    glLineWidth(5);
+    glLineWidth(3);
     glColor3ub(0x42,0x42,0x42);
     //push and pop is required in model view!
     glPushMatrix();
@@ -249,30 +283,66 @@ void setLetter(char ch)
     //glutStrokeString(GLUT_STROKE_MONO_ROMAN,(unsigned char*)"abcdef");
     glPopMatrix();
 }
+/**
+   Draw a Button at 0,0
+   @param str specifies the string to be shown in button
+   @param outlined specifies outline, mostly used to show selection
+*/
+void drawButton(const char* str,bool outlined)
+{
+    float width=glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)str)*.3;
+    float height=glutStrokeHeight(GLUT_STROKE_ROMAN)*.3;
+    glColor3ub(0x42,0x42,0x42);
+    glBegin(GL_POLYGON);
+        glVertex2f(0,0);
+        glVertex2f(0,height);
+        glVertex2f(width+10,height);
+        glVertex2f(width+10,0);
+    glEnd();
+    //glRectf(WIDTH/2.0-5-glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207,WIDTH/2.0+5+glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207+glutStrokeHeight(GLUT_STROKE_ROMAN)*.3);
+    if(outlined)
+    {
+        glColor3ub(0,0,0);
+        glLineWidth(2);
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(0,0);
+            glVertex2f(0,height);
+            glVertex2f(width+10,height);
+            glVertex2f(width+10,0);
+        glEnd();
+    }
+    glLineWidth(2);
+    glColor3ub(0xF4,0x43,0x36);
+    glTranslatef(5,7,0);
+    glScalef(.3,.3,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)str);
+}
+float getButtonWidth(const char* str)
+{
+    return glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)str)*.3+10;
+}
+float getButtonHeight(const char* str)
+{
+    return glutStrokeHeight(GLUT_STROKE_ROMAN)*.3;
+}
 void menuLoop()
 {
-//    if(R_keys::ENTER>0)
-//    {
-//        R_keys::ENTER=0;
-//        R_states::STATE=R_states::GAME;
-//        return;
-//    }
     //Thickness of font
-    glLineWidth(5);
+    glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
     glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse");
     //cout<<glutStrokeHeight(GLUT_STROKE_ROMAN)<<" "<<glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse")<<endl;
     glPopMatrix();
-
-    //Thickness of font
-    glLineWidth(2);
-    glColor3ub(0x42,0x42,0x42);
     glPushMatrix();
-    glTranslatef(WIDTH/2.0-150,HEIGHT-150,0);
-    glScalef(.1f,.1f,0.0f);
-    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press Enter to Start, press Q to quit");
+    glTranslatef(WIDTH/2.0-getButtonWidth("PLAY")/2.0,HEIGHT-200,0);
+    drawButton("PLAY",R_keys::CURSOR==0);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-300,0);
+    drawButton("QUIT",R_keys::CURSOR==1);
     glPopMatrix();
 
     glPushMatrix();
@@ -311,6 +381,29 @@ void gameLoop()
     glEnd();
     glPopMatrix();
 }
+
+void pauseLoop()
+{
+    glLineWidth(3);
+    glColor3ub(0xff,0xff,0xff);
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
+    glScalef(.5,.5,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Game Paused!");
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-getButtonWidth("RESUME")/2.0,HEIGHT-200,0);
+    drawButton("RESUME",R_keys::CURSOR==0);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-300,0);
+    drawButton("QUIT",R_keys::CURSOR==1);
+    glPopMatrix();
+
+}
+
 static void resize(int width, int height)
 {
     glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
@@ -330,13 +423,23 @@ static void display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //Draw stuff here
-    //setLetter('R');
     switch(R_states::STATE)
     {
     case R_states::MENU:
         menuLoop();break;
     case R_states::GAME:
         gameLoop();break;
+    case R_states::PAUSE:
+        pauseLoop();break;
+    }
+    //FPS calculation
+    frame++;
+    curtime=glutGet(GLUT_ELAPSED_TIME);
+    if (curtime - timebase > 1000) {
+        printf("FPS:%4.2f\n",
+            frame*1000.0/(curtime-timebase));
+        timebase = curtime;
+        frame = 0;
     }
     glutSwapBuffers();
 }
@@ -349,33 +452,28 @@ static void idle(void)
     {
       cerr << "OpenGL ERROR: " << gluErrorString(err) << endl;
     }
-    frame++;
-	time=glutGet(GLUT_ELAPSED_TIME);
-	if (time - timebase > 1000) {
-		printf("FPS:%4.2f\n",
-			frame*1000.0/(time-timebase));
-		timebase = time;
-		frame = 0;
-	}
     glutPostRedisplay();
 }
+/**
+    Do anti alias if set in settings
+*/
 void antialias()
 {
-	if(R_settings::ANTIALIAS)
-	{
-	    ///////////////////////Do anti alias/////////////////////////
-	    //creates spaces (lines) bw polygon if multi sample does not work
-	    glEnable(GL_POLYGON_SMOOTH);
-	    //not sure enabling again is required
-	    glEnable(GL_MULTISAMPLE);
-	    ////////////////////////end of anti alias////////////////////
-	    GLint iMultiSample = 0;
+    if(R_settings::ANTIALIAS)
+    {
+        ///////////////////////Do anti alias/////////////////////////
+        //creates spaces (lines) bw polygon if multisample does not work
+        glEnable(GL_POLYGON_SMOOTH);
+        //not sure enabling again is required
+        glEnable(GL_MULTISAMPLE);
+        ////////////////////////end of anti alias////////////////////
+        GLint iMultiSample = 0;
         GLint iNumSamples = 0;
         glGetIntegerv(GL_SAMPLE_BUFFERS, &iMultiSample);
         glGetIntegerv(GL_SAMPLES, &iNumSamples);
         printf("MSAA on, GL_SAMPLE_BUFFERS = %d, GL_SAMPLES = %d\n", iMultiSample, iNumSamples);
-	}
-	else
+    }
+    else
     {
         glDisable(GL_MULTISAMPLE);
         printf("MSAA off\n");
@@ -393,7 +491,7 @@ int main(int argc, char *argv[])
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GL_MULTISAMPLE);
     if(!glutGet(GLUT_DISPLAY_MODE_POSSIBLE))
     {
-        //fallback if multisample is not possible
+    //fallback if multisample is not possible
         glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE);
         R_settings::ANTIALIAS=false;
     }
@@ -403,11 +501,13 @@ int main(int argc, char *argv[])
     glutCreateWindow("ReMorse");
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
- 	/*smoothen lines n points, doesn't seem to get affected by MULTISAMPLE.
- 	works only if called after the BlendFunc*/
+     /*smoothen lines n points, doesn't seem to get affected by MULTISAMPLE.
+     works only if called after the BlendFunc*/
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     antialias();
+    //make cursor invisible
+    glutSetCursor(GLUT_CURSOR_NONE);
     //set appropriate functions, may be we should put this in init as well
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
@@ -415,7 +515,7 @@ int main(int argc, char *argv[])
     glutKeyboardUpFunc(R_keys::keyup);
     glutSpecialFunc(R_keys::splkey);
     glutSpecialUpFunc(R_keys::splkeyup);
-    glutMouseFunc(R_mouse::mouse);
+    //glutMouseFunc(R_mouse::mouse);
     glutIdleFunc(idle);
     //make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
