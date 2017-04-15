@@ -159,7 +159,7 @@ class Obstacle
     //Worst case of three obstacles for each
     static const int MAX_BODIES = 15;
 
-    /* Use only even numbers for width and height 
+    /* Use only even numbers for width 
     Because we use integers and there is a division by 2 involved */
 
     //Width and height for dot obstacle
@@ -170,11 +170,12 @@ class Obstacle
     static const int DASH_WIDTH = 4;
     static const int DASH_HEIGHT = 4;
 
-    //TODO: Make this variable
     static const int speed = 5;     //Speed of each obstacles
     static const int spacing = 4;   //Spacing between obstacles
 
-    char curLetter;                     //The letter represented by this obstacle 
+    int curPos;                     //Starting position of first body
+    char curLetter;                 //The letter represented by this obstacle
+    char lastMorseChar;             //Last letter of Morse characters
     
     b2World *world;
     b2Body *bodies[MAX_BODIES];
@@ -182,6 +183,8 @@ class Obstacle
     //Creates a triangular kinematic body in bodies[] array at the index
     void createBody(int index, int base, int height, Config initConfig)
     {
+        curPos = initConfig.x;
+
         //Define body
         b2BodyDef def;
         def.type = b2_kinematicBody;
@@ -218,9 +221,12 @@ class Obstacle
     }
 
     public:
-        Obstacle(b2World *world) 
+        Obstacle() {}
+
+        Obstacle(b2World *world, int startPos) 
         {
             this->world = world;
+            curPos = startPos;
         }
 
         ~Obstacle() {}
@@ -234,34 +240,88 @@ class Obstacle
 
             string morseText = letterToMorse(letter);
 
-            int pos = 0;
-            
+            int pos = curPos;
+            int index = -1;     //For adding bodies
+
             for(int i = 0; i < morseText.length(); ++i)
             {
                 if(morseText[i] == '.')
                 {
-                    createBody(i, DOT_WIDTH, DOT_HEIGHT, {pos, 0, 0});
+                    createBody(++index, DOT_WIDTH, DOT_HEIGHT, {pos, 0, 0});
                     pos += DOT_WIDTH;
                 }
                 else 
-                    //Create 3 small bodies for a dash
                     for(int k = 0; k < 3; ++k)
                     {
-                        createBody(i, DASH_WIDTH, DASH_HEIGHT, {pos, 0, 0});
+                        createBody(++index, DASH_WIDTH, DASH_HEIGHT, {pos, 0, 0});
                         pos += DASH_WIDTH;
                     }
 
                 pos += spacing;
-            } 
+            }
+
+            lastMorseChar = morseText[morseText.length() - 1];
+        } 
+
+        //Set curPos value. Change will reflect only when setLetter is called.
+        void setCurPos(int pos)
+        {
+            curPos = pos;
+        }
+
+        int getLastPos()
+        {
+            int ret;
+
+            for(int i = MAX_BODIES-1; i >= 0; --i)
+                if(bodies[i])
+                {
+                    ret = bodies[i]->GetPosition().x;
+
+                    if(lastMorseChar == '.')
+                        ret += DOT_WIDTH;
+                    else
+                        ret += DASH_WIDTH;
+
+                    break;
+                }
+
+            return ret;
         }
 };
 
-//Manages obstacles
+//Manages obstacles. Set the string once and call update periodically.
 class ObstacleManager
 {
-	public:
-		ObstacleManager() {}
-		~ObstacleManager() {}
+    static const int BUFFER_SIZE = 4;
+    static const int letter_spacing = 6;
+
+    int curIndex;                       //Index of left most obstacle
+    string letterQueue;                 //String of letters
+    Obstacle buffer[BUFFER_SIZE];       //Obstacles that will be recycled
+
+    public:
+        ObstacleManager(b2World *world, string text) 
+        {
+            buffer[0] = Obstacle(world, 0);
+            buffer[0].setLetter(text[0]);
+
+            for(int i = 1; i < BUFFER_SIZE; ++i)
+            {
+                buffer[i] = Obstacle(world, buffer[i-1].getLastPos()+letter_spacing);
+                buffer[i].setLetter(text[i]);
+            }
+
+            letterQueue = text;
+            curIndex = -1;
+        }
+        
+        ~ObstacleManager() {}
+
+        void update()
+        {
+
+        }
 };
 
 //Returns Morse string of '.' and '-' for given letter
