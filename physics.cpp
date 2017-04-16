@@ -174,7 +174,7 @@ class Obstacle
     static const int DASH_WIDTH = 4;
     static const int DASH_HEIGHT = 4;
 
-    static const int speed = 5;     //Speed of each obstacles
+    static const int speed = 9;     //Speed of each obstacles
     static const int spacing = 4;   //Spacing between obstacles
 
     int curPos;                     //Starting position of first body
@@ -275,6 +275,13 @@ class Obstacle
             lastMorseChar = morseText[morseText.length() - 1];
         } 
 
+        //Destroys all bodies
+        void reset()
+        {
+            for(int i = 0; i < MAX_BODIES; ++i)
+                destroyBody(i);
+        }
+
         //Set curPos value. Change will reflect only when setLetter is called.
         void setCurPos(int pos)
         {
@@ -306,36 +313,60 @@ class Obstacle
 //Manages obstacles. Set the string once and call update periodically.
 class ObstacleManager
 {
+    static const int LEFT_BOUNDARY = -2;
     static const int BUFFER_SIZE = 4;
-    static const int letter_spacing = 6;
+    static const int letter_spacing = 15;
 
     int curIndex;                       //Index of left most obstacle
+    int textIndex;                      //Index of current letter in letterQueue
     string letterQueue;                 //String of letters
     Obstacle buffer[BUFFER_SIZE];       //Obstacles that will be recycled
 
     public:
+        //Important: text should have atleast one character
         ObstacleManager(b2World *world, string text) 
         {
             //Create the first obstacle with required x position
             buffer[0] = Obstacle(world, 0);
             buffer[0].setLetter(text[0]);
+            textIndex = 0;                      //First letter has been set
 
             //Subsequent obstacles will follow the previous obstacle with given spacing
-            for(int i = 1; i < BUFFER_SIZE; ++i)
+            for(int i = 1; (i < BUFFER_SIZE) && (textIndex < text.length()-1); ++i)
             {
                 buffer[i] = Obstacle(world, buffer[i-1].getLastPos()+letter_spacing);
-                buffer[i].setLetter(text[i]);
+                buffer[i].setLetter(text[++textIndex]);
             }
 
             letterQueue = text;
-            curIndex = -1;
+            curIndex = 0;
         }
         
         ~ObstacleManager() {}
 
         void update()
         {
+            if(buffer[curIndex].getLastPos() < LEFT_BOUNDARY)
+            {
+                //There are more letters to display
+                if(textIndex < letterQueue.length()-1)
+                {
+                    //Index of previous obstacle
+                    int prev = curIndex - 1;
+                    if(prev == -1)
+                        prev = BUFFER_SIZE - 1;
 
+                    //Next letter
+                    buffer[curIndex].setCurPos(buffer[prev].getLastPos()+letter_spacing);
+                    buffer[curIndex].setLetter(letterQueue[++textIndex]);
+                }
+                else
+                    buffer[curIndex].reset();
+
+                //Increment index to next obstacle
+                ++curIndex;
+                curIndex %= BUFFER_SIZE;
+            }
         }
 };
 
