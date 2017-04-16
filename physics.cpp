@@ -168,14 +168,14 @@ class Obstacle
 
     //Width and height for dot obstacle
     static const int DOT_WIDTH = 6;
-    static const int DOT_HEIGHT = 6;
+    static const int DOT_HEIGHT = 5;
 
     //Width and height for dash obstacle
     static const int DASH_WIDTH = 4;
-    static const int DASH_HEIGHT = 4;
+    static const int DASH_HEIGHT = 3;
 
-    static const int speed = 9;     //Speed of each obstacles
-    static const int spacing = 4;   //Spacing between obstacles
+    static const int speed = 15;     //Speed of each obstacles
+    static const int spacing = 7;   //Spacing between obstacles
 
     int curPos;                     //Starting position of first body
     char curLetter;                 //The letter represented by this obstacle
@@ -220,8 +220,10 @@ class Obstacle
 
     void destroyBody(int index)
     {
-        if(bodies[index])
+        if(bodies[index]) {
             world->DestroyBody(bodies[index]);
+            bodies[index] = NULL;
+        }
     }
 
     public:
@@ -231,6 +233,9 @@ class Obstacle
         {
             this->world = world;
             curPos = startPos;
+
+            for(int i = 0; i < MAX_BODIES; ++i)
+                bodies[i] = NULL;
         }
 
         ~Obstacle() {}
@@ -308,6 +313,11 @@ class Obstacle
 
             return ret;
         }
+
+        char getCurLetter()
+        {
+            return curLetter;
+        }
 };
 
 //Manages obstacles. Set the string once and call update periodically.
@@ -321,6 +331,8 @@ class ObstacleManager
     int textIndex;                      //Index of current letter in letterQueue
     string letterQueue;                 //String of letters
     Obstacle buffer[BUFFER_SIZE];       //Obstacles that will be recycled
+
+    int numReset;
 
     public:
         //Important: text should have atleast one character
@@ -340,33 +352,46 @@ class ObstacleManager
 
             letterQueue = text;
             curIndex = 0;
+            numReset = 0;
         }
         
         ~ObstacleManager() {}
 
         void update()
         {
-            if(buffer[curIndex].getLastPos() < LEFT_BOUNDARY)
-            {
-                //There are more letters to display
-                if(textIndex < letterQueue.length()-1)
+            if(numReset < BUFFER_SIZE)
+                if(buffer[curIndex].getLastPos() < LEFT_BOUNDARY)
                 {
-                    //Index of previous obstacle
-                    int prev = curIndex - 1;
-                    if(prev == -1)
-                        prev = BUFFER_SIZE - 1;
+                    //There are more letters to display
+                    if(textIndex < letterQueue.length()-1)
+                    {
+                        //Index of previous obstacle
+                        int prev = curIndex - 1;
+                        if(prev == -1)
+                            prev = BUFFER_SIZE - 1;
 
-                    //Next letter
-                    buffer[curIndex].setCurPos(buffer[prev].getLastPos()+letter_spacing);
-                    buffer[curIndex].setLetter(letterQueue[++textIndex]);
+                        //Next letter
+                        buffer[curIndex].setCurPos(buffer[prev].getLastPos()+letter_spacing);
+                        buffer[curIndex].setLetter(letterQueue[++textIndex]);
+                    }
+                    else
+                    {
+                        buffer[curIndex].reset();
+                        ++numReset;
+                    }
+
+                    //Increment index to next obstacle
+                    ++curIndex;
+                    curIndex %= BUFFER_SIZE;
                 }
-                else
-                    buffer[curIndex].reset();
+        }
 
-                //Increment index to next obstacle
-                ++curIndex;
-                curIndex %= BUFFER_SIZE;
-            }
+        char getDisplayChar()
+        {
+            if(numReset < BUFFER_SIZE)
+                return buffer[curIndex].getCurLetter();
+            else
+                return '!';
         }
 };
 
@@ -402,5 +427,6 @@ int main()
 		cout<<l<<": "<<letterToMorse(l)<<"\n";
 	}
 	cout<<"\nFin\n";
+
 	return 0;
 }
