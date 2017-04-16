@@ -4,17 +4,22 @@
 #include "lib/lodepng.cpp"
 #include "states.h"
 #include "keys.h"
+// THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
+// THINK:Where the hell do I keep this texname variable?
+// may be make static put inside the function? BTW this for loading texture
 GLuint texname;
 using namespace std;
 namespace R_settings
 {
+	// TODO:put more things here
     bool ANTIALIAS=true;
 }
 
 namespace R_images
 {
+	// THINK:not sure if this is the right way to store images and its properties
     const char* logoName="morse.png";
     vector<unsigned char> logo;
     unsigned logoWidth=261;
@@ -24,6 +29,12 @@ namespace R_images
     unsigned samWidth[]={110,110};
     unsigned samHeight[]={186,186};
 
+    /** OpenGL seems to draw images vertically flipped
+    	this function inverts our data so that it displays correctly
+    	@param img is our image data vector
+    	@param width is our image width
+    	@param height is our image height
+    */
     void invert(vector<unsigned char> &img,const unsigned width,const unsigned height)
     {
         unsigned char *imagePtr = &img[0];
@@ -45,8 +56,11 @@ namespace R_images
             }
         }
     }
+    /** Loads all required images for our game
+    */
     void loadImages()
     {
+    	//THINK:we are doing the same if else many times may be make a function?
         int error;
         if((error=lodepng::decode(logo,logoWidth,logoHeight,logoName)))
         {
@@ -75,7 +89,7 @@ namespace R_images
 
 void setTexture()
 {
-    // should use a variable input to set specific texture
+    // TODO:should use a variable input to set specific texture
     int v=rand()%2;
     glGenTextures(1, &texname);
     glBindTexture(GL_TEXTURE_2D, texname);
@@ -112,6 +126,9 @@ void setLetter(char ch)
 */
 void drawButton(const char* str,bool outlined)
 {
+	// Currently all our buttons use .3x of size of font
+	// anyway we can scale it by calling scalef before drawButton
+	// all values found by trial and error method
     float width=glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)str)*.3;
     float height=glutStrokeHeight(GLUT_STROKE_ROMAN)*.3;
     glColor3ub(0x42,0x42,0x42);
@@ -124,6 +141,7 @@ void drawButton(const char* str,bool outlined)
     //glRectf(WIDTH/2.0-5-glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207,WIDTH/2.0+5+glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207+glutStrokeHeight(GLUT_STROKE_ROMAN)*.3);
     if(outlined)
     {
+    	// Draw outline if specified
         glColor3ub(0,0,0);
         glLineWidth(2);
         glBegin(GL_LINE_LOOP);
@@ -149,7 +167,7 @@ float getButtonHeight(const char* str)
 }
 void menuLoop()
 {
-    //Thickness of font
+    // Thickness of font
     glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
@@ -182,7 +200,7 @@ void gameLoop()
     setTexture();
     glPushMatrix();
 
-    // should use global box variables for drawing character quad
+    // TODO:should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
         glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
         glTexCoord2d(0,1);  glVertex2f(0+50,R_images::samHeight[0]+50);
@@ -191,7 +209,7 @@ void gameLoop()
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
-    //draw ground... use actual values later
+    //draw ground... TODO:use actual values later
     glPushMatrix();
     glBegin(GL_POLYGON);
         glColor3ub(0xF4,0x43,0x36);
@@ -242,10 +260,12 @@ static void resize(int width, int height)
 static void display(void)
 {
     static int frame=0,curtime,timebase=0;
+    // THINK:Maybe clearing should be done in each loop separately,
+    // That way pause menu can show game in bg 
     glClear(GL_COLOR_BUFFER_BIT );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    //Draw stuff here
+    // Draw stuff here
     switch(R_states::STATE)
     {
     case R_states::MENU:
@@ -255,7 +275,7 @@ static void display(void)
     case R_states::PAUSE:
         pauseLoop();break;
     }
-    //FPS calculation
+    // FPS calculation
     frame++;
     curtime=glutGet(GLUT_ELAPSED_TIME);
     if (curtime - timebase > 1000) {
@@ -270,7 +290,7 @@ static void display(void)
 
 static void idle(void)
 {
-    //display opengl error for debugging
+    // display opengl error for debugging
     if (GLenum err = glGetError())
     {
       cerr << "OpenGL ERROR: " << gluErrorString(err) << endl;
@@ -285,9 +305,9 @@ void antialias()
     if(R_settings::ANTIALIAS)
     {
         ///////////////////////Do anti alias/////////////////////////
-        //creates spaces (lines) bw polygon if multisample does not work
+        // creates spaces (lines) bw polygon if multisample does not work
         glEnable(GL_POLYGON_SMOOTH);
-        //not sure enabling again is required
+        // THINK:not sure enabling again is required?
         glEnable(GL_MULTISAMPLE);
         ////////////////////////end of anti alias////////////////////
         GLint iMultiSample = 0;
@@ -306,7 +326,7 @@ void antialias()
 
 int main(int argc, char *argv[])
 {
-    //should put this in init
+    //TODO:should put this in init
     R_images::loadImages();
     glutInit(&argc, argv);
     glutInitWindowSize(WIDTH,HEIGHT);
@@ -324,23 +344,23 @@ int main(int argc, char *argv[])
     glutCreateWindow("ReMorse");
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-     /*smoothen lines n points, doesn't seem to get affected by MULTISAMPLE.
-     works only if called after the BlendFunc*/
+     /* smoothen lines n points, doesn't seem to get affected by MULTISAMPLE.
+     works only if called after the BlendFunc */
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     antialias();
-    //make cursor invisible
+    // make cursor invisible
     glutSetCursor(GLUT_CURSOR_NONE);
-    //set appropriate functions, may be we should put this in init as well
+    // set appropriate functions, THINK::may be we should put this in init as well
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
     glutKeyboardFunc(R_keys::key);
     glutKeyboardUpFunc(R_keys::keyup);
     glutSpecialFunc(R_keys::splkey);
     glutSpecialUpFunc(R_keys::splkeyup);
-    //glutMouseFunc(R_mouse::mouse);
+    // glutMouseFunc(R_mouse::mouse);
     glutIdleFunc(idle);
-    //make key not repeat events on long press
+    // make key not repeat events on long press
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
     glutMainLoop();

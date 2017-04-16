@@ -6,6 +6,7 @@ namespace R_states
     const int PAUSE=3;
 
     int STATE=0;
+    // THINK:this function might be redundant
     void setState(int state)
     {
         STATE=state;

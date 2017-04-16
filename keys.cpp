@@ -1,11 +1,20 @@
 #include "remorse.h"
 #include "states.h"
+/*  So the plan is to have different keyboard functions for each state.
+    The main key function will call the respective function based on state.
+    Menu based states like MENU and PAUSE don't require keyup events
+    THINK:CURSOR variable is for handling menu selection, 
+    not sure where else to put it
+*/
 namespace R_keys
 {
     bool UP=false;
     int CURSOR=0;
+    // TODO: merge splkey n key functions for each state,
+    // no point for us to diffrentiate bw them.
     void menu_key(unsigned char key, int x, int y)
     {
+        // key function for MENU state
         switch (key)
         {
             case 13:
@@ -23,6 +32,7 @@ namespace R_keys
     }
     void menu_splkey(unsigned char key, int x, int y)
     {
+        // splkey function for MENU state
         switch (key)
         {
             case GLUT_KEY_F11:glutFullScreenToggle();break;
@@ -37,6 +47,7 @@ namespace R_keys
     }
     void pause_key(unsigned char key, int x, int y)
     {
+        // key function for PAUSE state
         switch (key)
         {
             case 27 :
@@ -58,6 +69,7 @@ namespace R_keys
     }
     void pause_splkey(unsigned char key, int x, int y)
     {
+        // splkey function for PAUSE state
         switch (key)
         {
             case GLUT_KEY_F11:glutFullScreenToggle();break;
@@ -72,6 +84,7 @@ namespace R_keys
     }
     void game_key(unsigned char key, int x, int y)
     {
+        // keydown function for GAME state
         switch (key)
         {
             case 27 :
@@ -82,12 +95,14 @@ namespace R_keys
     }
     void game_keyup(unsigned char key, int x, int y)
     {
+        // keyup function for GAME state
         switch (key)
         {
         }
     }
     void game_splkey(unsigned char key, int x, int y)
     {
+        // splkeydown function for GAME state
         switch (key)
         {
              case GLUT_KEY_UP: UP=true; break;
@@ -96,6 +111,7 @@ namespace R_keys
     }
      void game_splkeyup(unsigned char key, int x, int y)
     {
+        // splkeyup function for GAME state
         switch (key)
         {
              case GLUT_KEY_UP: UP=false; break;
@@ -158,5 +174,3 @@ namespace R_keys
 
 
 }
-
-
