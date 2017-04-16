@@ -141,6 +141,8 @@ class Wall: public PhysicalObject
     public:
         Wall(b2World *world, Config initConfig): PhysicalObject(world) 
         {
+            //Static body by default
+
             bodyDef.position.Set(initConfig.x, initConfig.y);
             body = world->CreateBody(&bodyDef);   
 
@@ -151,8 +153,10 @@ class Wall: public PhysicalObject
         ~Wall() {}
 };
 
-//Represents a single letter. 
-//Holds a set of bodies corresponding to the Morse of the letter
+/* Represents a single letter. 
+Holds a set of bodies corresponding to the Morse of the letter.
+A dot is a single triangular body.
+A dash is a set of three smaller triangles. */
 class Obstacle
 {
     //Max of 5 characters in a Morse letter
@@ -231,25 +235,32 @@ class Obstacle
 
         ~Obstacle() {}
 
+        /* Calling this function will destroy existing bodies, and create 
+        new ones to represent the new letter. Although this can be optimized 
+        by doing checks such as checking for same letter, retain similar 
+        bodies etc, it is not done for the sake of simplicity */
         void setLetter(char letter)
         {
             curLetter = letter;
 
+            //Destory all existing bodies
             for(int i = 0; i < MAX_BODIES; ++i)
                 destroyBody(i);
 
             string morseText = letterToMorse(letter);
 
-            int pos = curPos;
-            int index = -1;     //For adding bodies
+            int pos = curPos;   //To handle positioning of bodies
+            int index = -1;     //For adding bodies to the array
 
             for(int i = 0; i < morseText.length(); ++i)
             {
+                //Create single body
                 if(morseText[i] == '.')
                 {
                     createBody(++index, DOT_WIDTH, DOT_HEIGHT, {pos, 0, 0});
                     pos += DOT_WIDTH;
                 }
+                //Create three smaller bodies
                 else 
                     for(int k = 0; k < 3; ++k)
                     {
@@ -260,6 +271,7 @@ class Obstacle
                 pos += spacing;
             }
 
+            //Needed for getLastPos()
             lastMorseChar = morseText[morseText.length() - 1];
         } 
 
@@ -269,6 +281,7 @@ class Obstacle
             curPos = pos;
         }
 
+        //Returns right most coordinate of last body in the array(bottom right vertex)
         int getLastPos()
         {
             int ret;
@@ -303,9 +316,11 @@ class ObstacleManager
     public:
         ObstacleManager(b2World *world, string text) 
         {
+            //Create the first obstacle with required x position
             buffer[0] = Obstacle(world, 0);
             buffer[0].setLetter(text[0]);
 
+            //Subsequent obstacles will follow the previous obstacle with given spacing
             for(int i = 1; i < BUFFER_SIZE; ++i)
             {
                 buffer[i] = Obstacle(world, buffer[i-1].getLastPos()+letter_spacing);
