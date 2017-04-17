@@ -3,7 +3,7 @@
 /*  So the plan is to have different keyboard functions for each state.
     The main key function will call the respective function based on state.
     Menu based states like MENU and PAUSE don't require keyup events
-    THINK:CURSOR variable is for handling menu selection, 
+    THINK:CURSOR variable is for handling menu selection,
     not sure where else to put it
 */
 namespace R_keys
@@ -27,14 +27,6 @@ namespace R_keys
                 }
                 CURSOR=0;
                 break;
-
-        }
-    }
-    void menu_splkey(unsigned char key, int x, int y)
-    {
-        // splkey function for MENU state
-        switch (key)
-        {
             case GLUT_KEY_F11:glutFullScreenToggle();break;
             case GLUT_KEY_UP:
                             if(CURSOR>0)
@@ -43,6 +35,7 @@ namespace R_keys
                             break;
             case GLUT_KEY_DOWN:
                              CURSOR=(CURSOR+1)%2; break;
+
         }
     }
     void pause_key(unsigned char key, int x, int y)
@@ -64,14 +57,6 @@ namespace R_keys
                 }
                 CURSOR=0;
                 break;
-
-        }
-    }
-    void pause_splkey(unsigned char key, int x, int y)
-    {
-        // splkey function for PAUSE state
-        switch (key)
-        {
             case GLUT_KEY_F11:glutFullScreenToggle();break;
             case GLUT_KEY_UP:
                             if(CURSOR>0)
@@ -80,6 +65,7 @@ namespace R_keys
                             break;
             case GLUT_KEY_DOWN:
                              CURSOR=(CURSOR+1)%2; break;
+
         }
     }
     void game_key(unsigned char key, int x, int y)
@@ -91,6 +77,9 @@ namespace R_keys
             case 'q':
             case 'Q':
                 R_states::STATE=R_states::PAUSE; break;
+            case GLUT_KEY_UP: UP=true; break;
+            case GLUT_KEY_F11:glutFullScreenToggle();break;
+
         }
     }
     void game_keyup(unsigned char key, int x, int y)
@@ -98,23 +87,7 @@ namespace R_keys
         // keyup function for GAME state
         switch (key)
         {
-        }
-    }
-    void game_splkey(unsigned char key, int x, int y)
-    {
-        // splkeydown function for GAME state
-        switch (key)
-        {
-             case GLUT_KEY_UP: UP=true; break;
-             case GLUT_KEY_F11:glutFullScreenToggle();break;
-        }
-    }
-     void game_splkeyup(unsigned char key, int x, int y)
-    {
-        // splkeyup function for GAME state
-        switch (key)
-        {
-             case GLUT_KEY_UP: UP=false; break;
+            case GLUT_KEY_UP: UP=false; break;
         }
     }
     void key(unsigned char key, int x, int y)
@@ -151,11 +124,11 @@ namespace R_keys
         switch(R_states::STATE)
         {
             case R_states::MENU:
-                            menu_splkey(key,x,y);break;
+                            menu_key(key,x,y);break;
             case R_states::GAME:
-                            game_splkey(key,x,y);break;
+                            game_key(key,x,y);break;
             case R_states::PAUSE:
-                            pause_splkey(key,x,y);break;
+                            pause_key(key,x,y);break;
         }
     }
     void splkeyup(int key, int x, int y)
@@ -166,7 +139,7 @@ namespace R_keys
             case R_states::MENU:
                             break;
             case R_states::GAME:
-                            game_splkeyup(key,x,y);break;
+                            game_keyup(key,x,y);break;
             case R_states::PAUSE:
                             break;
         }
