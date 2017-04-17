@@ -15,6 +15,8 @@ namespace R_settings
 {
 	// TODO:put more things here
     bool ANTIALIAS=true;
+    int MINWIDTH=640;
+    int MINHEIGHT=550;
 }
 
 namespace R_images
@@ -181,7 +183,7 @@ void menuLoop()
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-300,0);
+    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
     drawButton("QUIT",R_keys::CURSOR==1);
     glPopMatrix();
 
@@ -238,7 +240,7 @@ void pauseLoop()
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-300,0);
+    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
     drawButton("QUIT",R_keys::CURSOR==1);
     glPopMatrix();
 
@@ -246,22 +248,34 @@ void pauseLoop()
 
 static void resize(int width, int height)
 {
-    glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
-    WIDTH=width;
-    HEIGHT=height;
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0,width,0,height);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
+    // check if window size is too small, call reshape appropriately
+    // THINK/TODO: may be we should find a scale factor or something and scale each objects
+    if(width<R_settings::MINWIDTH && height<R_settings::MINHEIGHT)
+        glutReshapeWindow(R_settings::MINWIDTH,R_settings::MINHEIGHT);
+    else if(width<R_settings::MINWIDTH)
+        glutReshapeWindow(R_settings::MINWIDTH,height);
+    else if(height<R_settings::MINHEIGHT)
+        glutReshapeWindow(width,R_settings::MINHEIGHT);
+    else
+    {
+        glClearColor(0.9568f,0.2627f,0.2117f,1.0f);
+        WIDTH=width;
+        HEIGHT=height;
+        glViewport(0, 0, width, height);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluOrtho2D(0,width,0,height);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity() ;
+    }
+
 }
 
 static void display(void)
 {
     static int frame=0,curtime,timebase=0;
     // THINK:Maybe clearing should be done in each loop separately,
-    // That way pause menu can show game in bg 
+    // That way pause menu can show game in bg
     glClear(GL_COLOR_BUFFER_BIT );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

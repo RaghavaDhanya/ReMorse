@@ -8,5 +8,4 @@ namespace R_states
     const int PAUSE=3;
 
     extern int STATE;
-    void setState(int);
 }

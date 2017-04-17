@@ -10,8 +10,6 @@ namespace R_keys
 {
     bool UP=false;
     int CURSOR=0;
-    // TODO: merge splkey n key functions for each state,
-    // no point for us to diffrentiate bw them.
     void menu_key(unsigned char key, int x, int y)
     {
         // key function for MENU state
