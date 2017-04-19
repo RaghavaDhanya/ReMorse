@@ -332,7 +332,7 @@ class ObstacleManager
     string letterQueue;                 //String of letters
     Obstacle buffer[BUFFER_SIZE];       //Obstacles that will be recycled
 
-    int numReset;
+    int numReset;                       //To keep track of number of times reset() has been called
 
     public:
         //Important: text should have atleast one character
@@ -359,7 +359,9 @@ class ObstacleManager
 
         void update()
         {
+            //Update only if there are obstacles left
             if(numReset < BUFFER_SIZE)
+                //Check if leftmost obstacle has crossed beyond left edge
                 if(buffer[curIndex].getLastPos() < LEFT_BOUNDARY)
                 {
                     //There are more letters to display
@@ -392,6 +394,19 @@ class ObstacleManager
                 return buffer[curIndex].getCurLetter();
             else
                 return '!';
+        }
+};
+
+//Class that has methods to listen to collisions
+class ContactListener: public b2ContactListener
+{
+    public:
+        ContactListener() {}
+        ~ContactListener() {}
+
+        void BeginContact(b2Contact* contact) 
+        {
+            cout<<"\nContact!";
         }
 };
 
