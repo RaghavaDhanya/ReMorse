@@ -20,6 +20,13 @@ struct Config
 	int angle;
 };
 
+//To identify body during collision
+struct BodyID
+{
+    //True if player, false if obstacle
+    bool isPlayer;
+};
+
 //Generic physical object
 class PhysicalObject
 {
@@ -84,6 +91,11 @@ class Player: public PhysicalObject
 
             //Create the body in the world
             body = world->CreateBody(&bodyDef);
+
+            //Store data in body to identify during collision
+            BodyID* id = new BodyID;
+            id->isPlayer = true;
+            body->SetUserData(id);
 
             //Shape of fixture
             shape.SetAsBox(WIDTH, HEIGHT);
@@ -197,6 +209,11 @@ class Obstacle
 
         //Create the body in the world
         bodies[index] = world->CreateBody(&def);
+
+        //Store data in body to identify during collision
+        BodyID* id = new BodyID;
+        id->isPlayer = false;
+        bodies[index]->SetUserData(id);
 
         //Triangle fixture vertices relative to BodyDef position as origin
         b2Vec2 vertices[3];
@@ -404,9 +421,19 @@ class ContactListener: public b2ContactListener
         ContactListener() {}
         ~ContactListener() {}
 
+        //Gets called on contact between two fixtures A and B
         void BeginContact(b2Contact* contact) 
         {
-            cout<<"\nContact!";
+            //Get data from both A and B
+            BodyID* aID = static_cast<BodyID*>(contact->GetFixtureA()->GetBody()->GetUserData());
+            BodyID* bID = static_cast<BodyID*>(contact->GetFixtureB()->GetBody()->GetUserData());
+
+            //Both are not null
+            if(aID && bID)
+                //One is player and the other is obstacle
+                if( (aID->isPlayer==true && bID->isPlayer==false)
+                    || (aID->isPlayer==false && bID->isPlayer==true) )
+                    cout<<"Player-obstacle collision!\n";
         }
 };
 
