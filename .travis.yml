@@ -1,4 +1,4 @@
 language: cpp
 compiler: gcc
-install: sudo apt-get install freeglut3-dev g++ gcc libbox2d-dev
+install: sudo apt-get install freeglut3-dev g++-5 gcc libbox2d-dev
 script: sh compile.sh
