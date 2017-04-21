@@ -253,7 +253,8 @@ class Obstacle
 
     void destroyBody(int index)
     {
-        if(bodies[index]) {
+        if(bodies[index]) 
+        {
             world->DestroyBody(bodies[index]);
             bodies[index] = NULL;
         }
@@ -437,9 +438,20 @@ class ObstacleManager
 //Class that has methods to listen to collisions
 class ContactListener: public b2ContactListener
 {
+    bool collided;
+
     public:
-        ContactListener() {}
+        ContactListener() 
+        {
+            collided = false;
+        }
+        
         ~ContactListener() {}
+
+        bool hasCollided()
+        {
+            return collided;
+        }
 
         //Gets called on contact between two fixtures A and B
         void BeginContact(b2Contact* contact) 
@@ -453,7 +465,7 @@ class ContactListener: public b2ContactListener
                 //One is player and the other is obstacle
                 if( (aID->isPlayer==true && bID->isPlayer==false)
                     || (aID->isPlayer==false && bID->isPlayer==true) )
-                    cout<<"Player-obstacle collision!\n";
+                    collided = true;
         }
 };
 
