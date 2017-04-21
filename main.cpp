@@ -1,12 +1,16 @@
 ///////////////////////////////Requires opengl 1.2/////////////////////////////
+#include <string>
+#include <sstream>
 #include "remorse.h"
 #include "lib/lodepng.h"
 #include "lib/lodepng.cpp"
 #include "states.h"
 #include "keys.h"
+#include "timer.h"
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
+long long SCORE=0;
 // THINK:Where the hell do I keep this texname variable?
 // may be make static put inside the function? BTW this for loading texture
 GLuint texname;
@@ -195,7 +199,16 @@ void menuLoop()
 
 void gameLoop()
 {
+    ostringstream stm;
+    stm<<"$:"<<SCORE;
     setLetter('R');
+    glLineWidth(3);
+    glColor3ub(0xff,0xff,0xff);
+    glPushMatrix();
+    glTranslatef(5,HEIGHT-40,0);
+    glScalef(.3,.3,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)stm.str().c_str());
+    glPopMatrix();
     /* enable texture.
     !!!!!!!!Very dangerous!!!!!!!. might affect other objects. disable before drawing other objects */
     glEnable(GL_TEXTURE_2D);
@@ -372,6 +385,7 @@ int main(int argc, char *argv[])
     glutKeyboardUpFunc(R_keys::keyup);
     glutSpecialFunc(R_keys::splkey);
     glutSpecialUpFunc(R_keys::splkeyup);
+    glutTimerFunc(17,timer,UPDATE);
     // glutMouseFunc(R_mouse::mouse);
     glutIdleFunc(idle);
     // make key not repeat events on long press

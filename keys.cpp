@@ -1,5 +1,6 @@
 #include "remorse.h"
 #include "states.h"
+#include "timer.h"
 /*  So the plan is to have different keyboard functions for each state.
     The main key function will call the respective function based on state.
     Menu based states like MENU and PAUSE don't require keyup events
@@ -19,7 +20,9 @@ namespace R_keys
                 switch(CURSOR)
                 {
                     case 0:
-                        R_states::STATE=R_states::GAME; break;
+                        R_states::STATE=R_states::GAME;
+                        glutTimerFunc(17,timer,UPDATE);
+                        break;
                     case 1:
                         exit(0); break;
                 }
@@ -44,12 +47,16 @@ namespace R_keys
             case 27 :
             case 'q':
             case 'Q':
-                R_states::STATE=R_states::GAME; break;
+                R_states::STATE=R_states::GAME;
+                glutTimerFunc(17,timer,UPDATE);
+                break;
             case 13:
                 switch(CURSOR)
                 {
                     case 0:
-                        R_states::STATE=R_states::GAME; break;
+                        R_states::STATE=R_states::GAME;
+                        glutTimerFunc(17,timer,UPDATE);
+                        break;
                     case 1:
                         R_states::STATE=R_states::MENU; break;
                 }
