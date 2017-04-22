@@ -140,14 +140,24 @@ class Player: public PhysicalObject
                     body->ApplyLinearImpulse(b2Vec2(0, JUMP_IMPULSE), body->GetWorldCenter(), true);
                 }
 
-                //If player begins falling down, apply force opposing gravity
-                //Consider setting velocity 0
+                //Player just begins falling down
                 else if(body->GetLinearVelocity().y < 0)
-                    body->ApplyForce(body->GetMass()*-world->GetGravity(), body->GetWorldCenter(), true);
+                {
+                    body->SetLinearVelocity({0, 0});
+                    //Ignore gravity
+                    body->SetGravityScale(0);
+                }
             }  
 
             else
             {
+                if(inAir)
+                {
+                    //Restore effect of gravity on body
+                    body->SetGravityScale(1);
+                    body->ApplyForce(body->GetMass()*world->GetGravity(), body->GetWorldCenter(), true);
+                }
+                
                 //Disable inAir on hitting ground
                 //TODO: Do this by getting position of ground wall
                 if(body->GetPosition().y < GROUND_POS)
