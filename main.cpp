@@ -10,6 +10,7 @@
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
+//THINK: where to put score, may be in the values given by backend
 long long SCORE=0;
 // THINK:Where the hell do I keep this texname variable?
 // may be make static put inside the function? BTW this for loading texture
@@ -199,10 +200,13 @@ void menuLoop()
 
 void gameLoop()
 {
+
+    setLetter('R');
+    //display score
+    //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
+    glLineWidth(3);
     ostringstream stm;
     stm<<"$:"<<SCORE;
-    setLetter('R');
-    glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
     glTranslatef(5,HEIGHT-40,0);
