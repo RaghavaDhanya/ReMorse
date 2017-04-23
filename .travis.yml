@@ -7,5 +7,6 @@ before_install:
   - sh buildBox2D.sh     
 install: sudo apt-get install g++-5 gcc libbox2d-dev
 script:     
-  - sh compile.sh   
+  - sh compile.sh
+  - ls /usr/include/   
   - g++ physics.cpp -lBox2D -lGL
