@@ -1,0 +1,11 @@
+language: cpp    
+compiler: gcc   
+before_install:  
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test    
+  - sudo apt-get update -qq
+  - sudo apt-get install freeglut3-dev
+  - sh buildBox2D.sh     
+install: sudo apt-get install g++-5 gcc libbox2d-dev libbox2d2.3.0   
+script:     
+  - sh compile.sh   
+  - g++ physics.cpp -lBox2D -lGL
