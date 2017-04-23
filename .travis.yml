@@ -11,4 +11,3 @@ install:
 script:
   - sh compile.sh
   - ls /usr/include/   
-  - g++ physics.cpp -lBox2D -lGL
