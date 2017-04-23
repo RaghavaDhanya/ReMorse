@@ -7,7 +7,7 @@
 #include "states.h"
 #include "keys.h"
 #include "timer.h"
-#include "values.h"
+#include "physics.h"
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
@@ -203,7 +203,7 @@ void gameLoop()
 {
 
     //setLetter('R');
-    setLetter(R_values::letter);
+    setLetter(R_physics::curLetter);
     //display score
     //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
     glLineWidth(3);
