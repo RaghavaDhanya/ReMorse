@@ -7,4 +7,4 @@ before_install:
 install: sudo apt-get install freeglut3-dev 
 script: 
   - sh compile.sh
-  - g++-5 physics.cpp -lBox2D -lGL -std=c++11
+  - g++ physics.cpp -lBox2D -lGL 
