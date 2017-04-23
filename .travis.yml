@@ -5,8 +5,10 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install freeglut3-dev
   - sh buildBox2D.sh     
-install: sudo apt-get install g++-5 gcc libbox2d-dev
-script:     
+install: 
+  - sudo apt-get install g++-5 gcc libbox2d-dev
+  - sudo ln /usr/include/Box2D.h /usr/include/Box2D/Box2D.h     
+script:
   - sh compile.sh
   - ls /usr/include/   
   - g++ physics.cpp -lBox2D -lGL
