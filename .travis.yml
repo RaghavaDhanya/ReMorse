@@ -5,8 +5,6 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install freeglut3-dev   
 install: sudo apt-get install g++-5 gcc libbox2d2.3.0 libbox2d-dev
-script:
-  - sh compile.sh
-  - g++ -std=c++11 -c physics.cpp -lBox2D -lGL
+script: sh compile.sh
 sudo: required
 dist: trusty 
