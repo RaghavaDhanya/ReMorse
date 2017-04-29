@@ -16,6 +16,8 @@ string letterToMorse(char let);
 namespace R_physics
 {
     char curLetter = '^';
+    
+    void stepPhysics();
 }
 
 ////////////////////////////////////////////////////////////
@@ -513,15 +515,7 @@ string letterToMorse(char let)
 /////////////////////////// MAIN ///////////////////////////
 ////////////////////////////////////////////////////////////
 
-/*
-int main()
+void R_physics::stepPhysics()
 {
-	for(char l='a'; l<='z'; ++l)
-	{
-		cout<<l<<": "<<letterToMorse(l)<<"\n";
-	}
-	cout<<"\nFin\n";
-
-	return 0;
+	
 }
-*/

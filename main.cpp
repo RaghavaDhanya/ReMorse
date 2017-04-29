@@ -201,9 +201,12 @@ void menuLoop()
 
 void gameLoop()
 {
+	//Update physics
+	R_physics::stepPhysics();
 
     //setLetter('R');
     setLetter(R_physics::curLetter);
+    
     //display score
     //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
     glLineWidth(3);
