@@ -13,13 +13,6 @@ using namespace std;
 
 string letterToMorse(char let);
 
-namespace R_physics
-{
-    char curLetter = '^';
-    
-    void stepPhysics();
-}
-
 ////////////////////////////////////////////////////////////
 //////////////////////// STRUCTURES ////////////////////////
 ////////////////////////////////////////////////////////////
@@ -170,6 +163,16 @@ class Player: public PhysicalObject
                 if(body->GetPosition().y < GROUND_POS)
                     inAir = false;
             }
+        }
+
+        float getXPos()
+        { 
+            return body->GetPosition().x;  
+        }
+
+        float getYPos()
+        { 
+            return body->GetPosition().y;  
         }
 };
 
@@ -515,7 +518,29 @@ string letterToMorse(char let)
 /////////////////////////// MAIN ///////////////////////////
 ////////////////////////////////////////////////////////////
 
+//Create box2d world with gravity
+b2World m_world(b2Vec2(0, -80));
+
+float32 timeStep = 1.0f / 60.0f;
+int32 velocityIterations = 8;
+int32 positionIterations = 3;
+
+Player player(&m_world, {4, 14, 0});
+Wall wall(&m_world, {0, -10, 0});
+ObstacleManager manager(&m_world, "abcdefghijkl");
+ContactListener contactListener();
+
+//For explanation, check physics.h
+namespace R_physics
+{
+	float playerX, playerY;
+    char curLetter = ' ';
+    bool jumpForceOn = false;
+    
+    void stepPhysics();
+}
+
 void R_physics::stepPhysics()
 {
-	
+	m_world.Step(timeStep, velocityIterations, positionIterations);
 }

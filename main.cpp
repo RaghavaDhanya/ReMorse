@@ -206,7 +206,7 @@ void gameLoop()
 
     //setLetter('R');
     setLetter(R_physics::curLetter);
-    
+
     //display score
     //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
     glLineWidth(3);
@@ -226,10 +226,10 @@ void gameLoop()
 
     // TODO:should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
-        glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
-        glTexCoord2d(0,1);  glVertex2f(0+50,R_images::samHeight[0]+50);
-        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
-        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);
+        glTexCoord2d(0,0);  glVertex2f(0+50*2,0+50*2);
+        glTexCoord2d(0,1);  glVertex2f(0+50*2,R_images::samHeight[0]+50*2);
+        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50*2,R_images::samHeight[0]+50*2);
+        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50*2,0+50*2);
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
