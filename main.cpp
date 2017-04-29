@@ -226,10 +226,19 @@ void gameLoop()
 
     // TODO:should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
-        glTexCoord2d(0,0);  glVertex2f(0+50*2,0+50*2);
-        glTexCoord2d(0,1);  glVertex2f(0+50*2,R_images::samHeight[0]+50*2);
-        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50*2,R_images::samHeight[0]+50*2);
-        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50*2,0+50*2);
+        /*glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
+        glTexCoord2d(0,1);  glVertex2f(0+50,R_images::samHeight[0]+50);
+        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
+        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);*/
+
+    	float p00x = R_physics::getPlayerX()*20.0 - R_images::samWidth[0]/2.0;
+    	float p00y = R_physics::getPlayerY()*20.0 - R_images::samHeight[0]/2.0;
+
+    	glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
+        glTexCoord2d(0,1);  glVertex2f(p00x, p00y+R_images::samHeight[0]);
+        glTexCoord2d(1,1);  glVertex2f(p00x+R_images::samWidth[0], p00y+R_images::samHeight[0]);
+        glTexCoord2d(1,0);  glVertex2f(p00x+R_images::samWidth[0], p00y);
+
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);

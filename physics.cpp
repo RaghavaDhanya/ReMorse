@@ -533,14 +533,28 @@ ContactListener contactListener();
 //For explanation, check physics.h
 namespace R_physics
 {
-	float playerX, playerY;
     char curLetter = ' ';
     bool jumpForceOn = false;
     
+    float getPlayerX();
+    float getPlayerY();
     void stepPhysics();
+}
+
+float R_physics::getPlayerX()
+{
+	return player.getXPos();
+}
+
+float R_physics::getPlayerY()
+{
+	return player.getYPos();
 }
 
 void R_physics::stepPhysics()
 {
+	//Make player jump if true
+	player.setJump(jumpForceOn);
+
 	m_world.Step(timeStep, velocityIterations, positionIterations);
 }
