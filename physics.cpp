@@ -82,7 +82,7 @@ class PhysicalObject
 class Player: public PhysicalObject
 {
     static const int WIDTH = 1;
-    static const int HEIGHT = 1;
+    static const int HEIGHT = 2;
 
     static const int MAX_JUMP = 4;
     static const int JUMP_IMPULSE = 100;   
@@ -168,12 +168,12 @@ class Player: public PhysicalObject
 
         float getXPos()
         { 
-            return body->GetPosition().x;  
+            return body->GetPosition().x - WIDTH;  
         }
 
         float getYPos()
         { 
-            return body->GetPosition().y;  
+            return body->GetPosition().y - HEIGHT;  
         }
 };
 
@@ -532,7 +532,7 @@ int32 velocityIterations = 8;
 int32 positionIterations = 3;
 
 Player player(&m_world, {4, 14, 0});
-Wall wall(&m_world, {0, -5, 0});
+Wall wall(&m_world, {0, 0, 0});
 ObstacleManager manager(&m_world, "abcdefghijkl");
 ContactListener contactListener;
 
@@ -552,18 +552,19 @@ namespace R_physics
 
 float R_physics::getPlayerX()
 {
-	cout<<"playerx: "<<player.getXPos()<<"\n";
+	cout<<"player.getXPos(): "<<player.getXPos()<<"\n";
 	return player.getXPos();
 }
 
 float R_physics::getPlayerY()
 {
-	cout<<"playerx: "<<player.getXPos()<<"\n";
+	cout<<"player.getYPos(): "<<player.getYPos()<<"\n";
 	return player.getYPos();
 }
 
 void R_physics::stepPhysics()
 {
+	//Initialize stuff for the first time
 	if(needInit)
 	{
 		m_world.SetContactListener(&contactListener);

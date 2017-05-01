@@ -11,6 +11,13 @@
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
+
+//To scale coordinates from physics world to graphics
+float B2_SCALEX = 20.0;
+float B2_SCALEY = 20.0;
+float B2_OFFSETX = 0.0;
+float B2_OFFSETY = 0.0;
+
 //THINK: where to put score, may be in the values given by backend
 long long SCORE=0;
 // THINK:Where the hell do I keep this texname variable?
@@ -173,6 +180,16 @@ float getButtonHeight(const char* str)
 {
     return glutStrokeHeight(GLUT_STROKE_ROMAN)*.3;
 }
+
+//return graphics scaled values for physics coordinates
+float getScaled(float val, bool x)
+{
+	if(x)
+		return val*B2_SCALEX + B2_OFFSETX;
+	
+	return val*B2_SCALEY + B2_OFFSETY;
+}
+
 void menuLoop()
 {
     // Thickness of font
@@ -231,8 +248,8 @@ void gameLoop()
         glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
         glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);*/
 
-    	float p00x = R_physics::getPlayerX()*45.0 - R_images::samWidth[0]/2.0 + 30.0*8;
-    	float p00y = R_physics::getPlayerY()*45.0 - R_images::samHeight[0]/2.0 + 30.0*8;
+    	float p00x = getScaled(R_physics::getPlayerX(), true);// - R_images::samWidth[0]/2.0;
+    	float p00y = getScaled(R_physics::getPlayerY(), false);// - R_images::samHeight[0]/2.0;
 
     	glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
         glTexCoord2d(0,1);  glVertex2f(p00x, p00y+R_images::samHeight[0]);
@@ -244,7 +261,7 @@ void gameLoop()
     glDisable(GL_TEXTURE_2D);
     //draw ground... TODO:use actual values later
     glPushMatrix();
-    /*glBegin(GL_POLYGON);
+    glBegin(GL_POLYGON);
         glColor3ub(0xF4,0x43,0x36);
         glVertex2f(0,0);
         glVertex2f(WIDTH,0);
@@ -253,10 +270,10 @@ void gameLoop()
         //glVertex2f(WIDTH,50);
         //glVertex2f(0,50);
 
-        float g_height = R_physics::groundHeight * 20.0;
+        float g_height = getScaled(R_physics::groundHeight, false);
         glVertex2f(WIDTH,g_height);
         glVertex2f(0,g_height);
-    glEnd(); */
+    glEnd(); 
     glPopMatrix();
 }
 
