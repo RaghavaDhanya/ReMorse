@@ -571,9 +571,6 @@ void R_physics::stepPhysics()
 		needInit = false;
 	}
 
-	//Make player jump if true
-	player.setJump(jumpForceOn);
-
 	//On collision with obstacle
 	if(contactListener.hasCollided())
     {
@@ -590,6 +587,10 @@ void R_physics::stepPhysics()
         R_states::STATE = R_states::MENU;
     }  
 
+    //Make player jump if true
+	player.setJump(jumpForceOn);
+
+	R_physics::curLetter = toupper(manager.getDisplayChar());
 	manager.update();
 
 	m_world.Step(timeStep, velocityIterations, positionIterations);
