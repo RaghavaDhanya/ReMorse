@@ -1,5 +1,6 @@
-#include<iostream>
-#include<Box2D/Box2D.h>
+#include <iostream>
+#include <Box2D/Box2D.h>
+#include "states.h"
 
 using namespace std;
 
@@ -180,7 +181,7 @@ class Player: public PhysicalObject
 class Wall: public PhysicalObject
 {
     static constexpr float WIDTH = 50.0f;
-    static constexpr float HEIGHT = 10.0f;
+    static constexpr float HEIGHT = 5.0f;
     
     public:
         Wall(b2World *world, Config initConfig): PhysicalObject(world) 
@@ -195,6 +196,11 @@ class Wall: public PhysicalObject
         }
 
         ~Wall() {}
+
+        float getHeight()
+        {
+        	return HEIGHT;
+        }
 };
 
 ////////////////////////////////////////////////////////////
@@ -393,7 +399,7 @@ class ObstacleManager
         ObstacleManager(b2World *world, string text) 
         {
             //Create the first obstacle with required x position
-            buffer[0] = Obstacle(world, 0);
+            buffer[0] = Obstacle(world, 90);
             buffer[0].setLetter(text[0]);
             textIndex = 0;                      //First letter has been set
 
@@ -485,7 +491,7 @@ class ContactListener: public b2ContactListener
                 //One is player and the other is obstacle
                 if( (aID->isPlayer==true && bID->isPlayer==false)
                     || (aID->isPlayer==false && bID->isPlayer==true) )
-                    collided = true;
+                	collided = true;
         }
 };
 
@@ -526,13 +532,16 @@ int32 velocityIterations = 8;
 int32 positionIterations = 3;
 
 Player player(&m_world, {4, 14, 0});
-Wall wall(&m_world, {0, -10, 0});
+Wall wall(&m_world, {0, -5, 0});
 ObstacleManager manager(&m_world, "abcdefghijkl");
-ContactListener contactListener();
+ContactListener contactListener;
+
+bool needInit = true;
 
 //For explanation, check physics.h
 namespace R_physics
 {
+	float groundHeight = wall.getHeight();
     char curLetter = ' ';
     bool jumpForceOn = false;
     
@@ -543,18 +552,44 @@ namespace R_physics
 
 float R_physics::getPlayerX()
 {
+	cout<<"playerx: "<<player.getXPos()<<"\n";
 	return player.getXPos();
 }
 
 float R_physics::getPlayerY()
 {
+	cout<<"playerx: "<<player.getXPos()<<"\n";
 	return player.getYPos();
 }
 
 void R_physics::stepPhysics()
 {
+	if(needInit)
+	{
+		m_world.SetContactListener(&contactListener);
+		needInit = false;
+	}
+
 	//Make player jump if true
 	player.setJump(jumpForceOn);
+
+	//On collision with obstacle
+	if(contactListener.hasCollided())
+    {
+		//Destroy all obstacles
+        for ( b2Body* b = m_world.GetBodyList(); b; b = b->GetNext())
+        {
+            BodyID* id = static_cast<BodyID*>(b->GetUserData());
+            if(id && id->isPlayer==false)
+                m_world.DestroyBody(b);
+        }
+
+        //Set as game over
+        //TODO: An actual game over state, instead of menu
+        R_states::STATE = R_states::MENU;
+    }  
+
+	manager.update();
 
 	m_world.Step(timeStep, velocityIterations, positionIterations);
 }

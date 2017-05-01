@@ -231,8 +231,8 @@ void gameLoop()
         glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
         glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);*/
 
-    	float p00x = R_physics::getPlayerX()*20.0 - R_images::samWidth[0]/2.0;
-    	float p00y = R_physics::getPlayerY()*20.0 - R_images::samHeight[0]/2.0;
+    	float p00x = R_physics::getPlayerX()*45.0 - R_images::samWidth[0]/2.0 + 30.0*8;
+    	float p00y = R_physics::getPlayerY()*45.0 - R_images::samHeight[0]/2.0 + 30.0*8;
 
     	glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
         glTexCoord2d(0,1);  glVertex2f(p00x, p00y+R_images::samHeight[0]);
@@ -244,14 +244,19 @@ void gameLoop()
     glDisable(GL_TEXTURE_2D);
     //draw ground... TODO:use actual values later
     glPushMatrix();
-    glBegin(GL_POLYGON);
+    /*glBegin(GL_POLYGON);
         glColor3ub(0xF4,0x43,0x36);
         glVertex2f(0,0);
         glVertex2f(WIDTH,0);
+
         glColor3ub(0xC6,0x28,0x28);
-        glVertex2f(WIDTH,50);
-        glVertex2f(0,50);
-    glEnd();
+        //glVertex2f(WIDTH,50);
+        //glVertex2f(0,50);
+
+        float g_height = R_physics::groundHeight * 20.0;
+        glVertex2f(WIDTH,g_height);
+        glVertex2f(0,g_height);
+    glEnd(); */
     glPopMatrix();
 }
 
