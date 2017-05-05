@@ -19,7 +19,7 @@ float B2_OFFSETX = 0.0;
 float B2_OFFSETY = 0.0;
 
 //THINK: where to put score, may be in the values given by backend
-long long SCORE=0;
+
 // THINK:Where the hell do I keep this texname variable?
 // may be make static put inside the function? BTW this for loading texture
 GLuint texname;
@@ -228,7 +228,7 @@ void gameLoop()
     //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
     glLineWidth(3);
     ostringstream stm;
-    stm<<"$:"<<SCORE;
+    stm<<"$:"<<R_physics::SCORE;
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
     glTranslatef(5,HEIGHT-40,0);

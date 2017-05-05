@@ -396,9 +396,17 @@ class ObstacleManager
 
     public:
         //Important: text should have atleast one character
-        ObstacleManager(b2World *world, string text) 
+        ObstacleManager() 
         {
-            //Create the first obstacle with required x position
+            //init();
+        }
+        
+        ~ObstacleManager() {}
+
+        //Call to reinitialize. There is no reset method for ObstacleManager because the physics bodies are explicitly destroyed on collision.
+        void init(b2World* world, string text)
+        {
+        	//Create the first obstacle with required x position
             buffer[0] = Obstacle(world, 90);
             buffer[0].setLetter(text[0]);
             textIndex = 0;                      //First letter has been set
@@ -414,8 +422,6 @@ class ObstacleManager
             curIndex = 0;
             numReset = 0;
         }
-        
-        ~ObstacleManager() {}
 
         void update()
         {
@@ -493,6 +499,11 @@ class ContactListener: public b2ContactListener
                     || (aID->isPlayer==false && bID->isPlayer==true) )
                 	collided = true;
         }
+
+        void reset()
+        {
+        	collided = false;
+        }
 };
 
 //Returns Morse string of '.' and '-' for given letter
@@ -533,7 +544,7 @@ int32 positionIterations = 3;
 
 Player player(&m_world, {4, 14, 0});
 Wall wall(&m_world, {0, 0, 0});
-ObstacleManager manager(&m_world, "abcdefghijkl");
+ObstacleManager manager;
 ContactListener contactListener;
 
 bool needInit = true;
@@ -544,10 +555,12 @@ namespace R_physics
 	float groundHeight = wall.getHeight();
     char curLetter = ' ';
     bool jumpForceOn = false;
+    long long SCORE = 0;
     
     float getPlayerX();
     float getPlayerY();
     void stepPhysics();
+    void resetPhysics();
 }
 
 float R_physics::getPlayerX()
@@ -568,24 +581,13 @@ void R_physics::stepPhysics()
 	if(needInit)
 	{
 		m_world.SetContactListener(&contactListener);
+		manager.init(&m_world,"abcdefghijkl");
 		needInit = false;
 	}
-
+ 
 	//On collision with obstacle
 	if(contactListener.hasCollided())
-    {
-		//Destroy all obstacles
-        for ( b2Body* b = m_world.GetBodyList(); b; b = b->GetNext())
-        {
-            BodyID* id = static_cast<BodyID*>(b->GetUserData());
-            if(id && id->isPlayer==false)
-                m_world.DestroyBody(b);
-        }
-
-        //Set as game over
-        //TODO: An actual game over state, instead of menu
-        R_states::STATE = R_states::MENU;
-    }  
+		R_physics::resetPhysics();
 
     //Make player jump if true
 	player.setJump(jumpForceOn);
@@ -594,4 +596,27 @@ void R_physics::stepPhysics()
 	manager.update();
 
 	m_world.Step(timeStep, velocityIterations, positionIterations);
+}
+
+void R_physics::resetPhysics()
+{
+
+	needInit = true;
+	R_physics::curLetter = ' ';
+	R_physics::jumpForceOn = false;
+	R_physics::SCORE = 0;
+	contactListener.reset();
+
+	//Destroy all obstacles
+    for ( b2Body* b = m_world.GetBodyList(); b; b = b->GetNext())
+    {
+        BodyID* id = static_cast<BodyID*>(b->GetUserData());
+        if(id && id->isPlayer==false)
+            m_world.DestroyBody(b);
+    }
+
+    //Set as game over
+    //TODO: An actual game over state, instead of menu
+    //TODDOOOOOOO
+    R_states::STATE = R_states::MENU;
 }
