@@ -1,6 +1,7 @@
 #include "remorse.h"
 #include "states.h"
 #include "timer.h"
+#include "physics.h"
 /*  So the plan is to have different keyboard functions for each state.
     The main key function will call the respective function based on state.
     Menu based states like MENU and PAUSE don't require keyup events
@@ -9,7 +10,7 @@
 */
 namespace R_keys
 {
-    bool UP=false;
+    //bool UP=false;
     int CURSOR=0;
     void menu_key(unsigned char key, int x, int y)
     {
@@ -58,7 +59,9 @@ namespace R_keys
                         glutTimerFunc(17,timer,UPDATE);
                         break;
                     case 1:
-                        R_states::STATE=R_states::MENU; break;
+                        R_states::STATE=R_states::MENU; 
+                        R_physics::resetPhysics();
+                        break;
                 }
                 CURSOR=0;
                 break;
@@ -73,6 +76,10 @@ namespace R_keys
 
         }
     }
+    void over_key(unsigned char key, int x, int y)
+    {
+        R_states::STATE=R_states::MENU;
+    }
     void game_key(unsigned char key, int x, int y)
     {
         // keydown function for GAME state
@@ -82,7 +89,7 @@ namespace R_keys
             case 'q':
             case 'Q':
                 R_states::STATE=R_states::PAUSE; break;
-            case GLUT_KEY_UP: UP=true; break;
+            case GLUT_KEY_UP: R_physics::jumpForceOn=true; break;
             case GLUT_KEY_F11:glutFullScreenToggle();break;
 
         }
@@ -92,7 +99,7 @@ namespace R_keys
         // keyup function for GAME state
         switch (key)
         {
-            case GLUT_KEY_UP: UP=false; break;
+            case GLUT_KEY_UP: R_physics::jumpForceOn=false; break;
         }
     }
     void key(unsigned char key, int x, int y)
@@ -106,6 +113,8 @@ namespace R_keys
                             game_key(key,x,y);break;
             case R_states::PAUSE:
                             pause_key(key,x,y);break;
+            case R_states::GAMEOVER:
+                            over_key(key,x,y);break;
         }
 
         //glutPostRedisplay();
@@ -134,6 +143,8 @@ namespace R_keys
                             game_key(key,x,y);break;
             case R_states::PAUSE:
                             pause_key(key,x,y);break;
+            case R_states::GAMEOVER:
+                            over_key(key,x,y);break;
         }
     }
     void splkeyup(int key, int x, int y)

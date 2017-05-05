@@ -158,7 +158,7 @@ void drawButton(const char* str,bool outlined)
     {
     	// Draw outline if specified
         glColor3ub(0,0,0);
-        glLineWidth(2);
+        glLineWidth(5);
         glBegin(GL_LINE_LOOP);
             glVertex2f(0,0);
             glVertex2f(0,height);
@@ -293,12 +293,28 @@ void pauseLoop()
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
-    drawButton("QUIT",R_keys::CURSOR==1);
+    glTranslatef(WIDTH/2.0-getButtonWidth("MENU")/2.0,HEIGHT-260,0);
+    drawButton("MENU",R_keys::CURSOR==1);
     glPopMatrix();
 
 }
-
+void overLoop()
+{
+    glLineWidth(3);
+    glColor3ub(0xff,0xff,0xff);
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-210,HEIGHT-110,0);
+    glScalef(.5,.5,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Game Over!");
+    glPopMatrix();    
+    glLineWidth(2);
+    glColor3ub(0xff,0xff,0xff);
+    glPushMatrix();
+    glTranslatef(WIDTH/2.0-210,HEIGHT-210,0);
+    glScalef(.2,.2,0);
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press any key to continue.");
+    glPopMatrix();
+}
 static void resize(int width, int height)
 {
     // check if window size is too small, call reshape appropriately
@@ -341,6 +357,8 @@ static void display(void)
         gameLoop();break;
     case R_states::PAUSE:
         pauseLoop();break;
+    case R_states::GAMEOVER:
+        overLoop();break;
     }
     // FPS calculation
     frame++;

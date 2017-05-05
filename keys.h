@@ -1,7 +1,7 @@
 
 namespace R_keys
 {
-    extern bool UP;
+    //extern bool UP;
     extern int CURSOR;
     void menu_key(unsigned char key, int x, int y);
     void pause_key(unsigned char key, int x, int y);

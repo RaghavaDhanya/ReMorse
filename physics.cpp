@@ -587,7 +587,13 @@ void R_physics::stepPhysics()
  
 	//On collision with obstacle
 	if(contactListener.hasCollided())
+	{
 		R_physics::resetPhysics();
+		//Set as game over
+	    //TODO: An actual game over state, instead of menu
+	    //TODDOOOOOOO
+	    R_states::STATE = R_states::GAMEOVER;
+	}
 
     //Make player jump if true
 	player.setJump(jumpForceOn);
@@ -614,9 +620,4 @@ void R_physics::resetPhysics()
         if(id && id->isPlayer==false)
             m_world.DestroyBody(b);
     }
-
-    //Set as game over
-    //TODO: An actual game over state, instead of menu
-    //TODDOOOOOOO
-    R_states::STATE = R_states::MENU;
 }
