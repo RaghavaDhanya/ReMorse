@@ -88,7 +88,7 @@ class Player: public PhysicalObject
     static const int JUMP_IMPULSE = 100;   
 
     //Replace with actual position of ground wall in game. Somehow.
-    static const int GROUND_POS = 2;   
+    int GROUND_POS = 5;   
 
     bool inAir;     //To hover on long press. Check jump function
 
@@ -122,6 +122,11 @@ class Player: public PhysicalObject
         }
 
         ~Player() {}
+
+        void setGroundPos(int pos)
+        {
+        	GROUND_POS = pos;
+        }
 
         /* When called with true, player will jump with initial impulse, and hover there.
            When called with false, player will fall if hovering */
@@ -161,7 +166,7 @@ class Player: public PhysicalObject
                 
                 //Disable inAir on hitting ground
                 //TODO: Do this by getting position of ground wall
-                if(body->GetPosition().y < GROUND_POS)
+                if( float(body->GetPosition().y-HEIGHT) <= float(GROUND_POS + 0.2) )
                     inAir = false;
             }
         }
@@ -581,6 +586,7 @@ void R_physics::stepPhysics()
 	if(needInit)
 	{
 		m_world.SetContactListener(&contactListener);
+		player.setGroundPos(R_physics::groundHeight);
 		manager.init(&m_world,"abcdefghijkl");
 		needInit = false;
 	}
