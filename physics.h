@@ -1,6 +1,8 @@
 namespace R_physics
 {
 	extern float groundHeight;
+	extern float playerWidth;
+	extern float playerHeight;
 	extern float playerX, playerY;		
 	extern char curLetter;				//The current letter to be displayed on the screen
 	extern bool jumpForceOn;			//Set to true to make player jump and hover. Set to false to make player fall if in the air

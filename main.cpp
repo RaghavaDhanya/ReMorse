@@ -13,10 +13,10 @@ int HEIGHT = 600;
 int WIDTH = 800;
 
 //To scale coordinates from physics world to graphics
-float B2_SCALEX = 20.0;
-float B2_SCALEY = 20.0;
-float B2_OFFSETX = 0.0;
-float B2_OFFSETY = 0.0;
+float B2_SCALEX = 100.0;
+float B2_SCALEY = 100.0;
+float B2_OFFSETX = -225.0;
+float B2_OFFSETY = -400.0;
 
 //THINK: where to put score, may be in the values given by backend
 
@@ -250,11 +250,17 @@ void gameLoop()
 
     	float p00x = getScaled(R_physics::getPlayerX(), true);// - R_images::samWidth[0]/2.0;
     	float p00y = getScaled(R_physics::getPlayerY(), false);// - R_images::samHeight[0]/2.0;
+        float p01x = p00x;
+        float p01y = getScaled(R_physics::getPlayerY()+R_physics::playerHeight, false);
+        float p11x = getScaled(R_physics::getPlayerX()+R_physics::playerWidth, true);
+        float p11y = p01y;
+        float p10x = p11x;
+        float p10y = p00y;
 
     	glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
-        glTexCoord2d(0,1);  glVertex2f(p00x, p00y+R_images::samHeight[0]);
-        glTexCoord2d(1,1);  glVertex2f(p00x+R_images::samWidth[0], p00y+R_images::samHeight[0]);
-        glTexCoord2d(1,0);  glVertex2f(p00x+R_images::samWidth[0], p00y);
+        glTexCoord2d(0,1);  glVertex2f(p01x, p01y);
+        glTexCoord2d(1,1);  glVertex2f(p11x, p11y);
+        glTexCoord2d(1,0);  glVertex2f(p10x, p10y);
 
     glEnd();
     glPopMatrix();

@@ -81,8 +81,8 @@ class PhysicalObject
 //Main player
 class Player: public PhysicalObject
 {
-    static const int WIDTH = 1;
-    static const int HEIGHT = 2;
+    static constexpr float WIDTH = 1.10;
+    static constexpr float HEIGHT = 1.86;
 
     static const int MAX_JUMP = 4;
     static const int JUMP_IMPULSE = 200;   
@@ -589,6 +589,8 @@ bool needInit = true;
 namespace R_physics
 {
 	float groundHeight = 5;//wall.getHeight();
+	float playerWidth = 1.10;
+	float playerHeight = 1.86;
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
