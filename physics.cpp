@@ -30,6 +30,8 @@ struct BodyID
 {
     //True if player, false if obstacle
     bool isPlayer;
+
+    bool isDot;
 };
 
 ////////////////////////////////////////////////////////////
@@ -268,6 +270,9 @@ class Obstacle
         //Store data in body to identify during collision
         BodyID* id = new BodyID;
         id->isPlayer = false;
+        id->isDot = false;
+        if(base == DOT_WIDTH)
+        	id->isDot = true;
         bodies[index]->SetUserData(id);
 
         //Triangle fixture vertices relative to BodyDef position as origin
@@ -392,6 +397,22 @@ class Obstacle
             return ret;
         }
 
+        int getBodyPos(int index)
+        {
+        	if(bodies[index])
+        		return bodies[index]->GetPosition().x;
+
+        	return -1;
+        }
+
+        int getBodyType(int index)
+        {
+        	if(bodies[index])
+        		return (static_cast<BodyID*>(bodies[index]->GetUserData()))->isDot;
+
+        	return -1;
+        }
+
         char getCurLetter()
         {
             return curLetter;
@@ -473,6 +494,20 @@ class ObstacleManager
                     ++curIndex;
                     curIndex %= BUFFER_SIZE;
                 }
+        }
+
+        void updateTriPos(int arr[60][2])
+        {
+        	int arrIndex = 0;
+        	for(int i = 0; i < BUFFER_SIZE; ++i)
+        	{
+        		for(int k = 0; k < 15; ++k)
+        		{
+        			arr[arrIndex][0] = buffer[i].getBodyPos(k);
+        			arr[arrIndex][1] = buffer[i].getBodyType(k);
+        			++arrIndex;
+        		}
+        	}
         }
 
         void setGroundLevel(int level)
@@ -591,9 +626,14 @@ namespace R_physics
 	float groundHeight = 5;//wall.getHeight();
 	float playerWidth = 1.10;
 	float playerHeight = 1.86;
+	int dotWidth = 6;
+	int dotHeight = 5;
+	int dashWidth = 4;
+	int dashHeight = 3;
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
+    int triPos[60][2];
     
     float getPlayerX();
     float getPlayerY();
@@ -653,6 +693,7 @@ void R_physics::stepPhysics()
 
 	R_physics::curLetter = toupper((*manager).getDisplayChar());
 	(*manager).update();
+	(*manager).updateTriPos(R_physics::triPos);
 
 	(*m_world).Step(timeStep, velocityIterations, positionIterations);
 
