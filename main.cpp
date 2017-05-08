@@ -281,6 +281,33 @@ void gameLoop()
         glVertex2f(0,g_height);
     glEnd(); 
     glPopMatrix();
+    glPushMatrix();
+    glColor3ub(0x00,0x00,0x00);
+    glBegin(GL_TRIANGLES);
+    for(int i=0;i<60;i++)
+    {
+        if(R_physics::triPos[i][0]!=-1)
+        {
+            int wid=R_physics::dotWidth;
+            int hei=R_physics::dotHeight;
+            if(R_physics::triPos[i][1]==0)
+            {
+                wid=R_physics::dashWidth;
+                hei=R_physics::dashHeight;
+            }
+            int x0=R_physics::triPos[i][0];
+            int y0=R_physics::groundHeight;
+            int x1=x0+wid/2;
+            int y1=y0+hei;
+            int x2=x0+wid;
+            int y2=y0;
+            glVertex2f(getScaled(x0,true),getScaled(y0,false));
+            glVertex2f(getScaled(x1,true),getScaled(y1,false));
+            glVertex2f(getScaled(x2,true),getScaled(y2,false));
+        }
+    }
+    glEnd();
+    glPopMatrix();
 }
 
 void pauseLoop()
