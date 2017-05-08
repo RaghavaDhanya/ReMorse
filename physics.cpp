@@ -85,7 +85,7 @@ class Player: public PhysicalObject
     static const int HEIGHT = 2;
 
     static const int MAX_JUMP = 4;
-    static const int JUMP_IMPULSE = 100;   
+    static const int JUMP_IMPULSE = 200;   
 
     //Replace with actual position of ground wall in game. Somehow.
     int GROUND_POS = 5;   
@@ -126,6 +126,12 @@ class Player: public PhysicalObject
         void setGroundPos(int pos)
         {
         	GROUND_POS = pos;
+        }
+
+        void setPos(int x, int y)
+        {
+        	body->SetLinearVelocity(b2Vec2(0, 0));
+        	body->SetTransform(b2Vec2(x, y), 0);
         }
 
         /* When called with true, player will jump with initial impulse, and hover there.
@@ -185,7 +191,7 @@ class Player: public PhysicalObject
 //The ground, and possibly upper ceiling
 class Wall: public PhysicalObject
 {
-    static constexpr float WIDTH = 50.0f;
+    static constexpr float WIDTH = 200.0f;
     static constexpr float HEIGHT = 5.0f;
     
     public:
@@ -239,6 +245,8 @@ class Obstacle
     int curPos;                     //Starting position of first body
     char curLetter;                 //The letter represented by this obstacle
     char lastMorseChar;             //Last letter of Morse characters
+
+    int groundLevel = 5;
     
     b2World *world;
     b2Body *bodies[MAX_BODIES];
@@ -327,14 +335,14 @@ class Obstacle
                 //Create single body
                 if(morseText[i] == '.')
                 {
-                    createBody(++index, DOT_WIDTH, DOT_HEIGHT, {pos, 0, 0});
+                    createBody(++index, DOT_WIDTH, DOT_HEIGHT, {pos, groundLevel, 0});
                     pos += DOT_WIDTH;
                 }
                 //Create three smaller bodies
                 else 
                     for(int k = 0; k < 3; ++k)
                     {
-                        createBody(++index, DASH_WIDTH, DASH_HEIGHT, {pos, 0, 0});
+                        createBody(++index, DASH_WIDTH, DASH_HEIGHT, {pos, groundLevel, 0});
                         pos += DASH_WIDTH;
                     }
 
@@ -356,6 +364,11 @@ class Obstacle
         void setCurPos(int pos)
         {
             curPos = pos;
+        }
+
+        void setGroundLevel(int gLevel)
+        {
+        	groundLevel = gLevel;
         }
 
         //Returns right most coordinate of last body in the array(bottom right vertex)
@@ -398,6 +411,7 @@ class ObstacleManager
     Obstacle buffer[BUFFER_SIZE];       //Obstacles that will be recycled
 
     int numReset;                       //To keep track of number of times reset() has been called
+    int groundLevel = 5;
 
     public:
         //Important: text should have atleast one character
@@ -413,6 +427,7 @@ class ObstacleManager
         {
         	//Create the first obstacle with required x position
             buffer[0] = Obstacle(world, 90);
+            buffer[0].setGroundLevel(groundLevel);
             buffer[0].setLetter(text[0]);
             textIndex = 0;                      //First letter has been set
 
@@ -420,6 +435,7 @@ class ObstacleManager
             for(int i = 1; (i < BUFFER_SIZE) && (textIndex < text.length()-1); ++i)
             {
                 buffer[i] = Obstacle(world, buffer[i-1].getLastPos()+letter_spacing);
+                buffer[i].setGroundLevel(groundLevel);
                 buffer[i].setLetter(text[++textIndex]);
             }
 
@@ -457,6 +473,11 @@ class ObstacleManager
                     ++curIndex;
                     curIndex %= BUFFER_SIZE;
                 }
+        }
+
+        void setGroundLevel(int level)
+        {
+        	groundLevel = level;
         }
 
         char getDisplayChar()
@@ -502,7 +523,10 @@ class ContactListener: public b2ContactListener
                 //One is player and the other is obstacle
                 if( (aID->isPlayer==true && bID->isPlayer==false)
                     || (aID->isPlayer==false && bID->isPlayer==true) )
-                	collided = true;
+            	{
+            		collided = true;
+            		cout<<"Collide aithu\n";
+            	}
         }
 
         void reset()
@@ -540,24 +564,31 @@ string letterToMorse(char let)
 /////////////////////////// MAIN ///////////////////////////
 ////////////////////////////////////////////////////////////
 
-//Create box2d world with gravity
-b2World m_world(b2Vec2(0, -80));
-
 float32 timeStep = 1.0f / 60.0f;
 int32 velocityIterations = 8;
 int32 positionIterations = 3;
 
+//Create box2d world with gravity
+/*b2World m_world(b2Vec2(0, -80));
+
 Player player(&m_world, {4, 14, 0});
 Wall wall(&m_world, {0, 0, 0});
 ObstacleManager manager;
-ContactListener contactListener;
+ContactListener contactListener;*/
+
+b2World* m_world;
+
+Player* player;
+Wall* wall;
+ObstacleManager* manager;
+ContactListener* contactListener;
 
 bool needInit = true;
 
 //For explanation, check physics.h
 namespace R_physics
 {
-	float groundHeight = wall.getHeight();
+	float groundHeight = 5;//wall.getHeight();
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
@@ -570,14 +601,21 @@ namespace R_physics
 
 float R_physics::getPlayerX()
 {
-	cout<<"player.getXPos(): "<<player.getXPos()<<"\n";
-	return player.getXPos();
+	cout<<"player.getXPos():\n";//<<player.getXPos()<<"\n";
+	
+	if(player)
+		return (*player).getXPos();
+
+	return 4;
 }
 
 float R_physics::getPlayerY()
 {
-	cout<<"player.getYPos(): "<<player.getYPos()<<"\n";
-	return player.getYPos();
+	cout<<"player.getYPos():\n";//<<player.getYPos()<<"\n";
+	if(player)
+		return (*player).getYPos();
+
+	return 0;
 }
 
 void R_physics::stepPhysics()
@@ -585,39 +623,58 @@ void R_physics::stepPhysics()
 	//Initialize stuff for the first time
 	if(needInit)
 	{
-		m_world.SetContactListener(&contactListener);
+
+		R_physics::SCORE = 0;
+
+		m_world = new b2World(b2Vec2(0, -80));
+
+		player = new Player(m_world, {4, 14, 0});
+		wall = new Wall(m_world, {0, 0, 0});
+		manager = new ObstacleManager();
+		contactListener = new ContactListener();
+
+
+
+		/*m_world.SetContactListener(&contactListener);
 		player.setGroundPos(R_physics::groundHeight);
-		manager.init(&m_world,"abcdefghijkl");
+		manager.setGroundLevel(R_physics::groundHeight);
+		manager.init(&m_world,"abcdefghijkl");*/
+		(*m_world).SetContactListener(contactListener);
+		(*player).setGroundPos(R_physics::groundHeight);
+		(*manager).setGroundLevel(R_physics::groundHeight);
+		(*manager).init(m_world,"abcdefghijkl");
 		needInit = false;
-	}
- 
-	//On collision with obstacle
-	if(contactListener.hasCollided())
-	{
-		R_physics::resetPhysics();
-		//Set as game over
-	    //TODO: An actual game over state, instead of menu
-	    //TODDOOOOOOO
-	    R_states::STATE = R_states::GAMEOVER;
 	}
 
     //Make player jump if true
-	player.setJump(jumpForceOn);
+	(*player).setJump(jumpForceOn);
 
-	R_physics::curLetter = toupper(manager.getDisplayChar());
-	manager.update();
+	R_physics::curLetter = toupper((*manager).getDisplayChar());
+	(*manager).update();
 
-	m_world.Step(timeStep, velocityIterations, positionIterations);
+	(*m_world).Step(timeStep, velocityIterations, positionIterations);
+
+	//On collision with obstacle
+	if((*contactListener).hasCollided())
+	{
+		R_physics::resetPhysics();
+		//Set as game over
+	    R_states::STATE = R_states::GAMEOVER;
+	}
 }
 
 void R_physics::resetPhysics()
 {
 
+	cout<<"Start reset\n";
 	needInit = true;
 	R_physics::curLetter = ' ';
 	R_physics::jumpForceOn = false;
-	R_physics::SCORE = 0;
+
+	//(*player).setPos(4, 0);
+	/*player.setJump(false);
 	contactListener.reset();
+	player.setPos(4, 0);
 
 	//Destroy all obstacles
     for ( b2Body* b = m_world.GetBodyList(); b; b = b->GetNext())
@@ -625,5 +682,18 @@ void R_physics::resetPhysics()
         BodyID* id = static_cast<BodyID*>(b->GetUserData());
         if(id && id->isPlayer==false)
             m_world.DestroyBody(b);
-    }
+    }*/
+
+    cout<<"Start delete\n";
+    delete player;
+    delete wall;
+    delete contactListener;
+    delete manager;
+    delete m_world;
+    player=NULL;
+    wall=NULL;
+    contactListener=NULL;
+    manager=NULL;
+    m_world=NULL;
+    cout<<"End delete\n";
 }
