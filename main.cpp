@@ -251,8 +251,8 @@ void gameLoop()
     	float p00x = getScaled(R_physics::getPlayerX(), true);// - R_images::samWidth[0]/2.0;
     	float p00y = getScaled(R_physics::getPlayerY(), false);// - R_images::samHeight[0]/2.0;
         float p01x = p00x;
-        float p01y = getScaled(R_physics::getPlayerY()+R_physics::playerHeight, false);
-        float p11x = getScaled(R_physics::getPlayerX()+R_physics::playerWidth, true);
+        float p01y = getScaled(R_physics::getPlayerY()+R_physics::playerHeight*2.0, false);
+        float p11x = getScaled(R_physics::getPlayerX()+R_physics::playerWidth*2.0, true);
         float p11y = p01y;
         float p10x = p11x;
         float p10y = p00y;
@@ -288,22 +288,24 @@ void gameLoop()
     {
         if(R_physics::triPos[i][0]!=-1)
         {
-            int wid=R_physics::dotWidth;
-            int hei=R_physics::dotHeight;
+            float wid=R_physics::dotWidth;
+            float hei=R_physics::dotHeight;
             if(R_physics::triPos[i][1]==0)
             {
                 wid=R_physics::dashWidth;
                 hei=R_physics::dashHeight;
             }
-            int x0=R_physics::triPos[i][0];
-            int y0=R_physics::groundHeight;
-            int x1=x0+wid/2;
-            int y1=y0+hei;
-            int x2=x0+wid;
-            int y2=y0;
+            float x0=(float)R_physics::triPos[i][0];
+            float y0=(float)R_physics::groundHeight;
+            float x1=x0+wid/2.0;
+            float y1=y0+hei;
+            float x2=x0+wid;
+            float y2=y0;
             glVertex2f(getScaled(x0,true),getScaled(y0,false));
             glVertex2f(getScaled(x1,true),getScaled(y1,false));
             glVertex2f(getScaled(x2,true),getScaled(y2,false));
+
+            //cout<<getScaled(x0,true)<<":"<<
         }
     }
     glEnd();

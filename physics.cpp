@@ -21,8 +21,8 @@ string letterToMorse(char let);
 //Hold position and angle data
 struct Config
 {
-	int x, y;
-	int angle;
+	float x, y;
+	float angle;
 };
 
 //To identify body during collision
@@ -83,11 +83,11 @@ class PhysicalObject
 //Main player
 class Player: public PhysicalObject
 {
-    static constexpr float WIDTH = 1.10;
-    static constexpr float HEIGHT = 1.86;
+    static constexpr float WIDTH = 1.10/2.0;
+    static constexpr float HEIGHT = 1.86/2.0;
 
     static const int MAX_JUMP = 4;
-    static const int JUMP_IMPULSE = 200;   
+    static const int JUMP_IMPULSE = 30;   
 
     //Replace with actual position of ground wall in game. Somehow.
     int GROUND_POS = 5;   
@@ -234,27 +234,27 @@ class Obstacle
     Because we use integers and there is a division by 2 involved */
 
     //Width and height for dot obstacle
-    static const int DOT_WIDTH = 6;
-    static const int DOT_HEIGHT = 5;
+    static constexpr float DOT_WIDTH = 0.9;
+    static constexpr float DOT_HEIGHT = 0.8;
 
     //Width and height for dash obstacle
-    static const int DASH_WIDTH = 4;
-    static const int DASH_HEIGHT = 3;
+    static constexpr float DASH_WIDTH = 0.6;
+    static constexpr float DASH_HEIGHT = 0.5;
 
-    static const int speed = 15;     //Speed of each obstacles
+    static const int speed = 10;     //Speed of each obstacles
     static const int spacing = 7;   //Spacing between obstacles
 
-    int curPos;                     //Starting position of first body
+    float curPos;                     //Starting position of first body
     char curLetter;                 //The letter represented by this obstacle
     char lastMorseChar;             //Last letter of Morse characters
 
-    int groundLevel = 5;
+    float groundLevel = 5.0;
     
     b2World *world;
     b2Body *bodies[MAX_BODIES];
 
     //Creates a triangular kinematic body in bodies[] array at the index
-    void createBody(int index, int base, int height, Config initConfig)
+    void createBody(int index, float base, float height, Config initConfig)
     {
         curPos = initConfig.x;
 
@@ -277,9 +277,9 @@ class Obstacle
 
         //Triangle fixture vertices relative to BodyDef position as origin
         b2Vec2 vertices[3];
-        vertices[0].Set(0, 0); //Bottom left
-        vertices[1].Set((base/2), height);   //Top
-        vertices[2].Set(base, 0); //Bottom right
+        vertices[0].Set(0.0, 0.0); //Bottom left
+        vertices[1].Set((base/2.0), height);   //Top
+        vertices[2].Set(base, 0.0); //Bottom right
 
         //Triangle shape
         b2PolygonShape shape;
@@ -307,7 +307,7 @@ class Obstacle
     public:
         Obstacle() {}
 
-        Obstacle(b2World *world, int startPos) 
+        Obstacle(b2World *world, float startPos) 
         {
             this->world = world;
             curPos = startPos;
@@ -332,7 +332,7 @@ class Obstacle
 
             string morseText = letterToMorse(letter);
 
-            int pos = curPos;   //To handle positioning of bodies
+            float pos = curPos;   //To handle positioning of bodies
             int index = -1;     //For adding bodies to the array
 
             for(int i = 0; i < morseText.length(); ++i)
@@ -397,7 +397,7 @@ class Obstacle
             return ret;
         }
 
-        int getBodyPos(int index)
+        float getBodyPos(int index)
         {
         	if(bodies[index])
         		return bodies[index]->GetPosition().x;
@@ -447,7 +447,7 @@ class ObstacleManager
         void init(b2World* world, string text)
         {
         	//Create the first obstacle with required x position
-            buffer[0] = Obstacle(world, 90);
+            buffer[0] = Obstacle(world, 40);
             buffer[0].setGroundLevel(groundLevel);
             buffer[0].setLetter(text[0]);
             textIndex = 0;                      //First letter has been set
@@ -496,7 +496,7 @@ class ObstacleManager
                 }
         }
 
-        void updateTriPos(int arr[60][2])
+        void updateTriPos(float arr[60][2])
         {
         	int arrIndex = 0;
         	for(int i = 0; i < BUFFER_SIZE; ++i)
@@ -600,8 +600,8 @@ string letterToMorse(char let)
 ////////////////////////////////////////////////////////////
 
 float32 timeStep = 1.0f / 60.0f;
-int32 velocityIterations = 8;
-int32 positionIterations = 3;
+int32 velocityIterations = 10;
+int32 positionIterations = 10;
 
 //Create box2d world with gravity
 /*b2World m_world(b2Vec2(0, -80));
@@ -624,16 +624,16 @@ bool needInit = true;
 namespace R_physics
 {
 	float groundHeight = 5;//wall.getHeight();
-	float playerWidth = 1.10;
-	float playerHeight = 1.86;
-	int dotWidth = 6;
-	int dotHeight = 5;
-	int dashWidth = 4;
-	int dashHeight = 3;
+	float playerWidth = 1.10/2.0;
+	float playerHeight = 1.86/2.0;
+	float dotWidth = 0.9;
+	float dotHeight = 0.8;
+	float dashWidth = 0.6;
+	float dashHeight = 0.5;
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
-    int triPos[60][2];
+    float triPos[60][2];
     
     float getPlayerX();
     float getPlayerY();
@@ -668,7 +668,7 @@ void R_physics::stepPhysics()
 
 		R_physics::SCORE = 0;
 
-		m_world = new b2World(b2Vec2(0, -80));
+		m_world = new b2World(b2Vec2(0, -50));
 
 		player = new Player(m_world, {4, 14, 0});
 		wall = new Wall(m_world, {0, 0, 0});
@@ -694,6 +694,9 @@ void R_physics::stepPhysics()
 	R_physics::curLetter = toupper((*manager).getDisplayChar());
 	(*manager).update();
 	(*manager).updateTriPos(R_physics::triPos);
+	for(int i=0; i<60; ++i)
+		cout<<"{"<<R_physics::triPos[i][0]<<","<<R_physics::triPos[i][1]<<"},";
+	cout<<"\n\n";
 
 	(*m_world).Step(timeStep, velocityIterations, positionIterations);
 
