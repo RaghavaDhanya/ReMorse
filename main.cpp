@@ -37,12 +37,12 @@ namespace R_images
 	// THINK:not sure if this is the right way to store images and its properties
     const char* logoName="morse.png";
     vector<unsigned char> logo;
-    unsigned logoWidth=261;
-    unsigned logoHeight=261;
+    unsigned logoWidth;
+    unsigned logoHeight;
     const char* samName[]={"sam01.png","sam02.png"};
     vector<unsigned char> sam[2];
-    unsigned samWidth[]={110,110};
-    unsigned samHeight[]={186,186};
+    unsigned samWidth[2];
+    unsigned samHeight[2];
 
     /** OpenGL seems to draw images vertically flipped
     	this function inverts our data so that it displays correctly
@@ -188,7 +188,7 @@ void xt_buf_regenerate()
     glScalef(.15,.12,0);
     glLineWidth(2);
     buf_offset = 76;
-    for(int i = 0; i < 16; ++i)
+    for(int i = 0; i <9; ++i)
         glutStrokeCharacter(GLUT_STROKE_ROMAN,(char)(int)R_physics::triPos[i+buf_offset][0]);
     glPopMatrix();
 }
@@ -206,7 +206,7 @@ float getScaled(float val, bool x)
 {
 	if(x)
 		return val*B2_SCALEX + B2_OFFSETX;
-	
+
 	return val*B2_SCALEY + B2_OFFSETY;
 }
 
@@ -225,7 +225,7 @@ void menuLoop()
     drawButton("PLAY",R_keys::CURSOR==0);
     glPopMatrix();
 
-    
+
 
     glPushMatrix();
     glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
@@ -303,7 +303,7 @@ void gameLoop()
         float g_height = getScaled(R_physics::groundHeight, false);
         glVertex2f(WIDTH,g_height);
         glVertex2f(0,g_height);
-    glEnd(); 
+    glEnd();
     glPopMatrix();
     glPushMatrix();
     glColor3ub(0x00,0x00,0x00);
@@ -365,7 +365,7 @@ void overLoop()
     glTranslatef(WIDTH/2.0-210,HEIGHT-110,0);
     glScalef(.5,.5,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Game Over!");
-    glPopMatrix();    
+    glPopMatrix();
     glLineWidth(2);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
