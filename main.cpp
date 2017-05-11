@@ -174,9 +174,23 @@ void drawButton(const char* str,bool outlined)
 }
 void xt_buf_regenerate()
 {
-    int buf_offset = 61;
-    for(int i = 0; i < 25; ++i)
-        (char)(int)R_physics::triPos[i+buf_offset][0];
+    glColor3ub(0x22,0x22,0x22);
+    glPushMatrix();
+    glTranslatef(0,10,0);
+    glScalef(.15,.12,0);
+    glLineWidth(2);
+    int buf_offset = 60;
+    for(int i = 0; i < 16; ++i)
+        glutStrokeCharacter(GLUT_STROKE_ROMAN,(char)(int)R_physics::triPos[i+buf_offset][0]);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(0,25,0);
+    glScalef(.15,.12,0);
+    glLineWidth(2);
+    buf_offset = 76;
+    for(int i = 0; i < 16; ++i)
+        glutStrokeCharacter(GLUT_STROKE_ROMAN,(char)(int)R_physics::triPos[i+buf_offset][0]);
+    glPopMatrix();
 }
 float getButtonWidth(const char* str)
 {
@@ -210,6 +224,8 @@ void menuLoop()
     glTranslatef(WIDTH/2.0-getButtonWidth("PLAY")/2.0,HEIGHT-200,0);
     drawButton("PLAY",R_keys::CURSOR==0);
     glPopMatrix();
+
+    
 
     glPushMatrix();
     glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
