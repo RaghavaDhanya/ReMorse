@@ -13,10 +13,10 @@ void timer(int value)
         //call update here
 
     	//Update physics
-		//R_physics::stepPhysics();
+		R_physics::stepPhysics();
 
         R_physics::SCORE++;
-        glutTimerFunc(17,timer,UPDATE);
+        glutTimerFunc(12,timer,UPDATE);
     }
     //cout<<"timer::"<<SCORE<<endl;
 }

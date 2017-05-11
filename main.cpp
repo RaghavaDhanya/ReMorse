@@ -219,7 +219,7 @@ void menuLoop()
 void gameLoop()
 {
 	//Update physics
-	R_physics::stepPhysics();
+	//R_physics::stepPhysics();
 
     //setLetter('R');
     setLetter(R_physics::curLetter);
