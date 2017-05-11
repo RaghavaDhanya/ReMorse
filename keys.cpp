@@ -22,7 +22,8 @@ namespace R_keys
                 {
                     case 0:
                         R_states::STATE=R_states::GAME;
-                        glutTimerFunc(17,timer,UPDATE);
+                        //glutTimerFunc(17,timer,UPDATE);
+                        timer(UPDATE);
                         break;
                     case 1:
                         exit(0); break;
@@ -49,14 +50,16 @@ namespace R_keys
             case 'q':
             case 'Q':
                 R_states::STATE=R_states::GAME;
-                glutTimerFunc(17,timer,UPDATE);
+                //glutTimerFunc(17,timer,UPDATE);
+                timer(UPDATE);
                 break;
             case 13:
                 switch(CURSOR)
                 {
                     case 0:
                         R_states::STATE=R_states::GAME;
-                        glutTimerFunc(17,timer,UPDATE);
+                        //glutTimerFunc(17,timer,UPDATE);
+                        timer(UPDATE);
                         break;
                     case 1:
                         R_states::STATE=R_states::MENU; 

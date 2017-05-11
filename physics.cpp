@@ -241,7 +241,7 @@ class Obstacle
     static constexpr float DASH_WIDTH = 0.6;
     static constexpr float DASH_HEIGHT = 0.5;
 
-    static const int speed = 10;     //Speed of each obstacles
+    static const int speed = 10;     //Speed of each obstacle
     static const int spacing = 7;   //Spacing between obstacles
 
     float curPos;                     //Starting position of first body
@@ -496,7 +496,7 @@ class ObstacleManager
                 }
         }
 
-        void updateTriPos(float arr[60][2])
+        void updateTriPos(float arr[85][2])
         {
         	int arrIndex = 0;
         	for(int i = 0; i < BUFFER_SIZE; ++i)
@@ -633,7 +633,17 @@ namespace R_physics
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
-    float triPos[60][2];
+    float triPos[85][2] ={ 
+    	{45.0,1.0},{40.0,1.0},{152.0,0.0},{170.0,1.0},{120.0,1.0},{59.0,0.0},{25.0,0.0},{140.0,0.0},{226.0,0.0},{184.0,0.0},{219.0,1.0},{70.0,1.0},{213.0,1.0},{91.0,0.0},{180.0,0.0},
+    	{184.0,1.0},{2.0,1.0},{59.0,1.0},{134.0,1.0},{130.0,1.0},{98.0,1.0},{221.0,0.0},{42.0,1.0},{163.0,1.0},{229.0,0.0},{189.0,1.0},{186.0,0.0},{154.0,1.0},{51.0,1.0},{176.0,1.0},{130.0,1.0},
+    	{154.0,0.0},{102.0,1.0},{188.0,0.0},{104.0,1.0},{72.0,0.0},{17.0,0.0},{166.0,1.0},{152.0,1.0},{241.0,1.0},{246.0,1.0},{139.0,1.0},{227.0,0.0},{36.0,0.0},{189.0,1.0},{241.0,1.0},
+    	{52.0,1.0},{225.0,0.0},{74.0,0.0},{186.0,0.0},{151.0,1.0},{174.0,1.0},{192.0,0.0},{28.0,1.0},{81.0,0.0},{205.0,1.0},{212.0,1.0},{27.0,0.0},{90.0,0.0},{83.0,1.0},
+    	{82.0,0.0},{97.0,1.0},{103.0,1.0},{104.0,0.0},{97.0,1.0},{118.0,1.0},{97.0,0.0},{32.0,0.0},{71.0,1.0},{32.0,1.0},{68.0,0.0},{104.0,1.0},{97.0,1.0},{110.0,0.0},{121.0,1.0},{97.0,0.0},
+		{82.0,1.0},{97.0,0.0},{118.0,0.0},{105.0,1.0},{107.0,1.0},{105.0,0.0},{114.0,1.0},{97.0,1.0},{110.0,0.0}
+	};
+
+
+
     
     float getPlayerX();
     float getPlayerY();
@@ -643,7 +653,7 @@ namespace R_physics
 
 float R_physics::getPlayerX()
 {
-	cout<<"player.getXPos():\n";//<<player.getXPos()<<"\n";
+	//cout<<"player.getXPos():\n";//<<player.getXPos()<<"\n";
 	
 	if(player)
 		return (*player).getXPos();
@@ -653,7 +663,7 @@ float R_physics::getPlayerX()
 
 float R_physics::getPlayerY()
 {
-	cout<<"player.getYPos():\n";//<<player.getYPos()<<"\n";
+	//cout<<"player.getYPos():\n";//<<player.getYPos()<<"\n";
 	if(player)
 		return (*player).getYPos();
 
@@ -675,8 +685,6 @@ void R_physics::stepPhysics()
 		manager = new ObstacleManager();
 		contactListener = new ContactListener();
 
-
-
 		/*m_world.SetContactListener(&contactListener);
 		player.setGroundPos(R_physics::groundHeight);
 		manager.setGroundLevel(R_physics::groundHeight);
@@ -694,9 +702,6 @@ void R_physics::stepPhysics()
 	R_physics::curLetter = toupper((*manager).getDisplayChar());
 	(*manager).update();
 	(*manager).updateTriPos(R_physics::triPos);
-	for(int i=0; i<60; ++i)
-		cout<<"{"<<R_physics::triPos[i][0]<<","<<R_physics::triPos[i][1]<<"},";
-	cout<<"\n\n";
 
 	(*m_world).Step(timeStep, velocityIterations, positionIterations);
 
@@ -711,8 +716,6 @@ void R_physics::stepPhysics()
 
 void R_physics::resetPhysics()
 {
-
-	cout<<"Start reset\n";
 	needInit = true;
 	R_physics::curLetter = ' ';
 	R_physics::jumpForceOn = false;
@@ -730,7 +733,6 @@ void R_physics::resetPhysics()
             m_world.DestroyBody(b);
     }*/
 
-    cout<<"Start delete\n";
     delete player;
     delete wall;
     delete contactListener;
@@ -741,5 +743,4 @@ void R_physics::resetPhysics()
     contactListener=NULL;
     manager=NULL;
     m_world=NULL;
-    cout<<"End delete\n";
 }

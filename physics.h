@@ -11,7 +11,7 @@ namespace R_physics
 	extern char curLetter;				//The current letter to be displayed on the screen
 	extern bool jumpForceOn;			//Set to true to make player jump and hover. Set to false to make player fall if in the air
 	extern long long SCORE;
-	extern float triPos[60][2];
+	extern float triPos[85][2];
 
 	float getPlayerX();
     float getPlayerY();					//x and y coordinates of player in physics system. SCALE BEFORE USE.
