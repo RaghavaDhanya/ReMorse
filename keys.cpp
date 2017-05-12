@@ -62,7 +62,7 @@ namespace R_keys
                         timer(UPDATE);
                         break;
                     case 1:
-                        R_states::STATE=R_states::MENU; 
+                        R_states::STATE=R_states::MENU;
                         R_physics::resetPhysics();
                         break;
                 }
@@ -94,7 +94,11 @@ namespace R_keys
             case 'q':
             case 'Q':
                 R_states::STATE=R_states::PAUSE; break;
-            case GLUT_KEY_UP: R_physics::jumpForceOn=true; break;
+            case GLUT_KEY_UP:
+            case 'w':
+            case 'W':
+            case ' ':
+                R_physics::jumpForceOn=true; break;
             case GLUT_KEY_F11:glutFullScreenToggle();break;
 
         }
@@ -104,7 +108,11 @@ namespace R_keys
         // keyup function for GAME state
         switch (key)
         {
-            case GLUT_KEY_UP: R_physics::jumpForceOn=false; break;
+            case GLUT_KEY_UP:
+            case 'w':
+            case 'W':
+            case ' ':
+                R_physics::jumpForceOn=false; break;
         }
     }
     void key(unsigned char key, int x, int y)

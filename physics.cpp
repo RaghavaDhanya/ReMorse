@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <ctime>
 #include <Box2D/Box2D.h>
 #include "states.h"
 
@@ -51,18 +52,18 @@ class PhysicalObject
         b2FixtureDef fixtureDef;
 
     public:
-        PhysicalObject(b2World *world) 
+        PhysicalObject(b2World *world)
         {
             this->world = world;
         }
 
-        ~PhysicalObject() 
+        ~PhysicalObject()
         {
             if(world)
                 world->DestroyBody(body);
         }
 
-        Config getConfig() 
+        Config getConfig()
         {
             Config config;
 
@@ -73,7 +74,7 @@ class PhysicalObject
                 config.angle = body->GetAngle();
             }
 
-            return config; 
+            return config;
         }
 };
 
@@ -88,15 +89,15 @@ class Player: public PhysicalObject
     static constexpr float HEIGHT = 1.86/2.0;
 
     static const int MAX_JUMP = 4;
-    static const int JUMP_IMPULSE = 30;   
+    static const int JUMP_IMPULSE = 30;
 
     //Replace with actual position of ground wall in game. Somehow.
-    int GROUND_POS = 5;   
+    int GROUND_POS = 5;
 
     bool inAir;     //To hover on long press. Check jump function
 
     public:
-        Player(b2World *world, Config initConfig): PhysicalObject(world) 
+        Player(b2World *world, Config initConfig): PhysicalObject(world)
         {
             inAir = false;
 
@@ -143,7 +144,7 @@ class Player: public PhysicalObject
         {
             /* Enforce max jumping height by applying a proporional force downwards */
             if(body->GetPosition().y > MAX_JUMP)
-                body->ApplyForce(body->GetMass()*-body->GetLinearVelocity(), 
+                body->ApplyForce(body->GetMass()*-body->GetLinearVelocity(),
                     body->GetWorldCenter(), true);
 
             if(jumpEnable)
@@ -162,7 +163,7 @@ class Player: public PhysicalObject
                     //Ignore gravity
                     body->SetGravityScale(0);
                 }
-            }  
+            }
 
             else
             {
@@ -172,7 +173,7 @@ class Player: public PhysicalObject
                     body->SetGravityScale(1);
                     body->ApplyForce(body->GetMass()*world->GetGravity(), body->GetWorldCenter(), true);
                 }
-                
+
                 //Disable inAir on hitting ground
                 //TODO: Do this by getting position of ground wall
                 if( float(body->GetPosition().y-HEIGHT) <= float(GROUND_POS + 0.2) )
@@ -181,13 +182,13 @@ class Player: public PhysicalObject
         }
 
         float getXPos()
-        { 
-            return body->GetPosition().x - WIDTH;  
+        {
+            return body->GetPosition().x - WIDTH;
         }
 
         float getYPos()
-        { 
-            return body->GetPosition().y - HEIGHT;  
+        {
+            return body->GetPosition().y - HEIGHT;
         }
 };
 
@@ -196,14 +197,14 @@ class Wall: public PhysicalObject
 {
     static constexpr float WIDTH = 200.0f;
     static constexpr float HEIGHT = 5.0f;
-    
+
     public:
-        Wall(b2World *world, Config initConfig): PhysicalObject(world) 
+        Wall(b2World *world, Config initConfig): PhysicalObject(world)
         {
             //Static body by default
 
             bodyDef.position.Set(initConfig.x, initConfig.y);
-            body = world->CreateBody(&bodyDef);   
+            body = world->CreateBody(&bodyDef);
 
             shape.SetAsBox(WIDTH, HEIGHT);
             body->CreateFixture(&shape, 0.0f);
@@ -221,7 +222,7 @@ class Wall: public PhysicalObject
 ///////////////////// OBSTACLE RELATED /////////////////////
 ////////////////////////////////////////////////////////////
 
-/* Represents a single letter. 
+/* Represents a single letter.
 Holds a set of bodies corresponding to the Morse of the letter.
 A dot is a single triangular body.
 A dash is a set of three smaller triangles. */
@@ -231,7 +232,7 @@ class Obstacle
     //Worst case of three obstacles for each
     static const int MAX_BODIES = 15;
 
-    /* Use only even numbers for width 
+    /* Use only even numbers for width
     Because we use integers and there is a division by 2 involved */
 
     //Width and height for dot obstacle
@@ -250,7 +251,7 @@ class Obstacle
     char lastMorseChar;             //Last letter of Morse characters
 
     float groundLevel = 5.0;
-    
+
     b2World *world;
     b2Body *bodies[MAX_BODIES];
 
@@ -298,7 +299,7 @@ class Obstacle
 
     void destroyBody(int index)
     {
-        if(bodies[index]) 
+        if(bodies[index])
         {
             world->DestroyBody(bodies[index]);
             bodies[index] = NULL;
@@ -308,7 +309,7 @@ class Obstacle
     public:
         Obstacle() {}
 
-        Obstacle(b2World *world, float startPos) 
+        Obstacle(b2World *world, float startPos)
         {
             this->world = world;
             curPos = startPos;
@@ -319,9 +320,9 @@ class Obstacle
 
         ~Obstacle() {}
 
-        /* Calling this function will destroy existing bodies, and create 
-        new ones to represent the new letter. Although this can be optimized 
-        by doing checks such as checking for same letter, retain similar 
+        /* Calling this function will destroy existing bodies, and create
+        new ones to represent the new letter. Although this can be optimized
+        by doing checks such as checking for same letter, retain similar
         bodies etc, it is not done for the sake of simplicity */
         void setLetter(char letter)
         {
@@ -345,7 +346,7 @@ class Obstacle
                     pos += DOT_WIDTH;
                 }
                 //Create three smaller bodies
-                else 
+                else
                     for(int k = 0; k < 3; ++k)
                     {
                         createBody(++index, DASH_WIDTH, DASH_HEIGHT, {pos, groundLevel, 0});
@@ -357,7 +358,7 @@ class Obstacle
 
             //Needed for getLastPos()
             lastMorseChar = morseText[morseText.length() - 1];
-        } 
+        }
 
         //Destroys all bodies
         void reset()
@@ -437,11 +438,11 @@ class ObstacleManager
 
     public:
         //Important: text should have atleast one character
-        ObstacleManager() 
+        ObstacleManager()
         {
             //init();
         }
-        
+
         ~ObstacleManager() {}
 
         //Call to reinitialize. There is no reset method for ObstacleManager because the physics bodies are explicitly destroyed on collision.
@@ -535,11 +536,11 @@ class ContactListener: public b2ContactListener
     bool collided;
 
     public:
-        ContactListener() 
+        ContactListener()
         {
             collided = false;
         }
-        
+
         ~ContactListener() {}
 
         bool hasCollided()
@@ -548,7 +549,7 @@ class ContactListener: public b2ContactListener
         }
 
         //Gets called on contact between two fixtures A and B
-        void BeginContact(b2Contact* contact) 
+        void BeginContact(b2Contact* contact)
         {
             //Get data from both A and B
             BodyID* aID = static_cast<BodyID*>(contact->GetFixtureA()->GetBody()->GetUserData());
@@ -592,7 +593,7 @@ string letterToMorse(char let)
 		case 'W': return ".--";		case 'X': return "-..-";
 		case 'Y': return "-.--";	case 'Z': return "--..";
 	}
-	
+
 	return "0";
 }
 
@@ -668,7 +669,7 @@ namespace R_physics
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
-    float triPos[85][2] ={ 
+    float triPos[85][2] ={
     	{45.0,1.0},{40.0,1.0},{152.0,0.0},{170.0,1.0},{120.0,1.0},{59.0,0.0},{25.0,0.0},{140.0,0.0},{226.0,0.0},{184.0,0.0},{219.0,1.0},{70.0,1.0},{213.0,1.0},{91.0,0.0},{180.0,0.0},
     	{184.0,1.0},{2.0,1.0},{59.0,1.0},{134.0,1.0},{130.0,1.0},{98.0,1.0},{221.0,0.0},{42.0,1.0},{163.0,1.0},{229.0,0.0},{189.0,1.0},{186.0,0.0},{154.0,1.0},{51.0,1.0},{176.0,1.0},{130.0,1.0},
     	{154.0,0.0},{102.0,1.0},{188.0,0.0},{104.0,1.0},{72.0,0.0},{17.0,0.0},{166.0,1.0},{152.0,1.0},{241.0,1.0},{246.0,1.0},{139.0,1.0},{227.0,0.0},{36.0,0.0},{189.0,1.0},{241.0,1.0},
@@ -676,7 +677,7 @@ namespace R_physics
     	{82.0,0.0},{97.0,1.0},{103.0,1.0},{104.0,0.0},{97.0,1.0},{118.0,1.0},{97.0,0.0},{32.0,0.0},{71.0,1.0},{32.0,1.0},{68.0,0.0},{104.0,1.0},{97.0,1.0},{110.0,0.0},{121.0,1.0},{97.0,0.0},
 		{82.0,1.0},{97.0,0.0},{118.0,0.0},{105.0,1.0},{107.0,1.0},{105.0,0.0},{114.0,1.0},{97.0,1.0},{110.0,0.0}
 	};
-    
+
     float getPlayerX();
     float getPlayerY();
     void stepPhysics();
@@ -684,7 +685,7 @@ namespace R_physics
 }
 
 float R_physics::getPlayerX()
-{	
+{
 	if(player)
 		return player->getXPos();
 

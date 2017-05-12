@@ -35,14 +35,14 @@ namespace R_settings
 namespace R_images
 {
 	// THINK:not sure if this is the right way to store images and its properties
-    const char* logoName="morse.png";
+    const char* logoName="res/morse.png";
     vector<unsigned char> logo;
     unsigned logoWidth;
     unsigned logoHeight;
-    const char* samName[]={"sam01.png","sam02.png"};
-    vector<unsigned char> sam[2];
-    unsigned samWidth[2];
-    unsigned samHeight[2];
+    const char* samName[]={"res/sam01.png","res/sam02.png","res/sam03.png","res/sam04.png"};
+    vector<unsigned char> sam[4];
+    unsigned samWidth[4];
+    unsigned samHeight[4];
 
     /** OpenGL seems to draw images vertically flipped
     	this function inverts our data so that it displays correctly
@@ -98,14 +98,31 @@ namespace R_images
         }
         else
             invert(sam[1],samWidth[1],samHeight[1]);
+        if((error=lodepng::decode(sam[2],samWidth[2],samHeight[2],samName[2])))
+        {
+            cout<<samName[2]<<":"<<lodepng_error_text(error)<<endl;
+            exit(1);
+        }
+        else
+            invert(sam[2],samWidth[2],samHeight[2]);
+        if((error=lodepng::decode(sam[3],samWidth[3],samHeight[3],samName[3])))
+        {
+            cout<<samName[3]<<":"<<lodepng_error_text(error)<<endl;
+            exit(1);
+        }
+        else
+            invert(sam[3],samWidth[3],samHeight[3]);
     }
 
 }
-
-void setTexture()
+/** Sets current texture to given image
+    @param img is image vector that has already been loaded
+    @param width is width of the image
+    @param height is height of image
+*/
+void setTexture(vector<unsigned char> img, unsigned width, unsigned height)
 {
     // TODO:should use a variable input to set specific texture
-    int v=rand()%2;
     glGenTextures(1, &texname);
     glBindTexture(GL_TEXTURE_2D, texname);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -116,8 +133,8 @@ void setTexture()
     // without this texture darkens
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, R_images::samWidth[0], R_images::samHeight[0],
-                0, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::sam[v][0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+                0, GL_RGBA, GL_UNSIGNED_BYTE, &img[0]);
 }
 /**
     Set a letter on top of screen, used during game loop
@@ -212,6 +229,9 @@ float getScaled(float val, bool x)
 
 void menuLoop()
 {
+    glClear(GL_COLOR_BUFFER_BIT );
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     // Thickness of font
     glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
@@ -242,6 +262,9 @@ void menuLoop()
 
 void gameLoop()
 {
+    glClear(GL_COLOR_BUFFER_BIT );
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 	//Update physics
 	//R_physics::stepPhysics();
 
@@ -262,7 +285,12 @@ void gameLoop()
     /* enable texture.
     !!!!!!!!Very dangerous!!!!!!!. might affect other objects. disable before drawing other objects */
     glEnable(GL_TEXTURE_2D);
-    setTexture();
+    {
+        //scoping so that these variables aren't accessible elsewhere
+        int sel=rand()%2;
+        int i=(R_physics::jumpForceOn?2:0);
+        setTexture(R_images::sam[i+sel],R_images::samWidth[i+sel],R_images::samHeight[i+sel]);
+    }
     glPushMatrix();
 
     // TODO:should use global box variables for drawing character quad
@@ -338,6 +366,9 @@ void gameLoop()
 
 void pauseLoop()
 {
+    glClear(GL_COLOR_BUFFER_BIT );
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
@@ -359,6 +390,9 @@ void pauseLoop()
 }
 void overLoop()
 {
+    glClear(GL_COLOR_BUFFER_BIT );
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     glLineWidth(3);
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
@@ -402,11 +436,6 @@ static void resize(int width, int height)
 static void display(void)
 {
     static int frame=0,curtime,timebase=0;
-    // THINK:Maybe clearing should be done in each loop separately,
-    // That way pause menu can show game in bg
-    glClear(GL_COLOR_BUFFER_BIT );
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     // Draw stuff here
     switch(R_states::STATE)
     {
@@ -417,7 +446,8 @@ static void display(void)
     case R_states::PAUSE:
         pauseLoop();break;
     case R_states::GAMEOVER:
-        overLoop();break;
+        //overLoop();
+        break;
     }
     // FPS calculation
     frame++;
