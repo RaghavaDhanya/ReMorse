@@ -612,6 +612,26 @@ ContactListener* contactListener;
 
 bool needInit = true;
 
+string getRandomSequence(int size)
+{
+	unsigned seed= time(0);
+    srand(seed);
+
+	char rChar = 'a' + rand() % 26;
+	string rStr = "";
+	rStr += rChar;
+	int i;
+
+	for(i = 1; i < size; ++i)
+	{
+		while( (rChar ='a'+rand()%26) == rStr[i-1] ) ;
+		rStr += rChar;
+	}
+
+	cout<<"Generated string: "<<rStr<<"\n";
+	return rStr;
+}
+
 //For explanation, check physics.h
 namespace R_physics
 {
@@ -661,7 +681,6 @@ void R_physics::stepPhysics()
 	//Initialize stuff for the first time
 	if(needInit)
 	{
-
 		R_physics::SCORE = 0;
 
 		m_world = new b2World(b2Vec2(0, -50));
@@ -674,7 +693,7 @@ void R_physics::stepPhysics()
 		m_world->SetContactListener(contactListener);
 		player->setGroundPos(R_physics::groundHeight);
 		manager->setGroundLevel(R_physics::groundHeight);
-		manager->init(m_world,"abcdefghijkl");
+		manager->init(m_world,getRandomSequence(10));
 		needInit = false;
 	}
 
