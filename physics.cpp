@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <Box2D/Box2D.h>
 #include "states.h"
 
@@ -599,6 +600,8 @@ string letterToMorse(char let)
 /////////////////////////// MAIN ///////////////////////////
 ////////////////////////////////////////////////////////////
 
+long long HIGHSCORE = 0;
+
 float32 timeStep = 1.0f / 60.0f;
 int32 velocityIterations = 10;
 int32 positionIterations = 10;
@@ -611,6 +614,8 @@ ObstacleManager* manager;
 ContactListener* contactListener;
 
 bool needInit = true;
+
+static const string highScoreFileName = ".skyho";
 
 string getRandomSequence(int size)
 {
@@ -630,6 +635,24 @@ string getRandomSequence(int size)
 
 	cout<<"Generated string: "<<rStr<<"\n";
 	return rStr;
+}
+
+void readHighScore()
+{
+	ifstream scoreFile;
+	scoreFile.open(highScoreFileName);
+	scoreFile>>HIGHSCORE;
+	scoreFile.close();
+
+	cout<<"Score from file:"<<HIGHSCORE<<"\n";
+}
+
+void writeHighScore(long long score)
+{
+	ofstream scoreFile;
+	scoreFile.open(highScoreFileName, ios::trunc);
+	scoreFile<<score;
+	scoreFile.close();
 }
 
 //For explanation, check physics.h
@@ -682,6 +705,7 @@ void R_physics::stepPhysics()
 	if(needInit)
 	{
 		R_physics::SCORE = 0;
+		readHighScore();
 
 		m_world = new b2World(b2Vec2(0, -50));
 
@@ -717,6 +741,9 @@ void R_physics::stepPhysics()
 
 void R_physics::resetPhysics()
 {
+	if(R_physics::SCORE > HIGHSCORE)
+		writeHighScore(R_physics::SCORE);
+
 	needInit = true;
 	R_physics::curLetter = ' ';
 	R_physics::jumpForceOn = false;
