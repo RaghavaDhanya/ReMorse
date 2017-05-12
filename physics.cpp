@@ -603,14 +603,6 @@ float32 timeStep = 1.0f / 60.0f;
 int32 velocityIterations = 10;
 int32 positionIterations = 10;
 
-//Create box2d world with gravity
-/*b2World m_world(b2Vec2(0, -80));
-
-Player player(&m_world, {4, 14, 0});
-Wall wall(&m_world, {0, 0, 0});
-ObstacleManager manager;
-ContactListener contactListener;*/
-
 b2World* m_world;
 
 Player* player;
@@ -623,7 +615,7 @@ bool needInit = true;
 //For explanation, check physics.h
 namespace R_physics
 {
-	float groundHeight = 5;//wall.getHeight();
+	float groundHeight = 5;			//wall.getHeight();
 	float playerWidth = 1.10/2.0;
 	float playerHeight = 1.86/2.0;
 	float dotWidth = 0.9;
@@ -641,9 +633,6 @@ namespace R_physics
     	{82.0,0.0},{97.0,1.0},{103.0,1.0},{104.0,0.0},{97.0,1.0},{118.0,1.0},{97.0,0.0},{32.0,0.0},{71.0,1.0},{32.0,1.0},{68.0,0.0},{104.0,1.0},{97.0,1.0},{110.0,0.0},{121.0,1.0},{97.0,0.0},
 		{82.0,1.0},{97.0,0.0},{118.0,0.0},{105.0,1.0},{107.0,1.0},{105.0,0.0},{114.0,1.0},{97.0,1.0},{110.0,0.0}
 	};
-
-
-
     
     float getPlayerX();
     float getPlayerY();
@@ -652,20 +641,17 @@ namespace R_physics
 }
 
 float R_physics::getPlayerX()
-{
-	//cout<<"player.getXPos():\n";//<<player.getXPos()<<"\n";
-	
+{	
 	if(player)
-		return (*player).getXPos();
+		return player->getXPos();
 
 	return 4;
 }
 
 float R_physics::getPlayerY()
 {
-	//cout<<"player.getYPos():\n";//<<player.getYPos()<<"\n";
 	if(player)
-		return (*player).getYPos();
+		return player->getYPos();
 
 	return 0;
 }
@@ -685,28 +671,24 @@ void R_physics::stepPhysics()
 		manager = new ObstacleManager();
 		contactListener = new ContactListener();
 
-		/*m_world.SetContactListener(&contactListener);
-		player.setGroundPos(R_physics::groundHeight);
-		manager.setGroundLevel(R_physics::groundHeight);
-		manager.init(&m_world,"abcdefghijkl");*/
-		(*m_world).SetContactListener(contactListener);
-		(*player).setGroundPos(R_physics::groundHeight);
-		(*manager).setGroundLevel(R_physics::groundHeight);
-		(*manager).init(m_world,"abcdefghijkl");
+		m_world->SetContactListener(contactListener);
+		player->setGroundPos(R_physics::groundHeight);
+		manager->setGroundLevel(R_physics::groundHeight);
+		manager->init(m_world,"abcdefghijkl");
 		needInit = false;
 	}
 
     //Make player jump if true
-	(*player).setJump(jumpForceOn);
+	player->setJump(jumpForceOn);
 
-	R_physics::curLetter = toupper((*manager).getDisplayChar());
-	(*manager).update();
-	(*manager).updateTriPos(R_physics::triPos);
+	R_physics::curLetter = toupper(manager->getDisplayChar());
+	manager->update();
+	manager->updateTriPos(R_physics::triPos);
 
-	(*m_world).Step(timeStep, velocityIterations, positionIterations);
+	m_world->Step(timeStep, velocityIterations, positionIterations);
 
 	//On collision with obstacle
-	if((*contactListener).hasCollided())
+	if(contactListener->hasCollided())
 	{
 		R_physics::resetPhysics();
 		//Set as game over
@@ -720,27 +702,9 @@ void R_physics::resetPhysics()
 	R_physics::curLetter = ' ';
 	R_physics::jumpForceOn = false;
 
-	//(*player).setPos(4, 0);
-	/*player.setJump(false);
-	contactListener.reset();
-	player.setPos(4, 0);
-
-	//Destroy all obstacles
-    for ( b2Body* b = m_world.GetBodyList(); b; b = b->GetNext())
-    {
-        BodyID* id = static_cast<BodyID*>(b->GetUserData());
-        if(id && id->isPlayer==false)
-            m_world.DestroyBody(b);
-    }*/
-
-    delete player;
-    delete wall;
-    delete contactListener;
-    delete manager;
-    delete m_world;
-    player=NULL;
-    wall=NULL;
-    contactListener=NULL;
-    manager=NULL;
-    m_world=NULL;
+    delete player;				player = NULL;
+    delete wall;				wall = NULL;
+    delete contactListener;		contactListener = NULL;
+    delete manager;				manager=NULL;
+    delete m_world;        		m_world=NULL;
 }
