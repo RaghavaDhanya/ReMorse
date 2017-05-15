@@ -122,7 +122,6 @@ namespace R_images
 */
 void setTexture(vector<unsigned char> img, unsigned width, unsigned height)
 {
-    // TODO:should use a variable input to set specific texture
     glGenTextures(1, &texname);
     glBindTexture(GL_TEXTURE_2D, texname);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -148,7 +147,6 @@ void setLetter(char ch)
     glPushMatrix();
     glTranslatef(WIDTH/2.0-50,HEIGHT-110,0);
     glutStrokeCharacter(GLUT_STROKE_ROMAN, (int)ch);
-    //glutStrokeString(GLUT_STROKE_MONO_ROMAN,(unsigned char*)"abcdef");
     glPopMatrix();
 }
 /**
@@ -170,7 +168,6 @@ void drawButton(const char* str,bool outlined)
         glVertex2f(width+10,height);
         glVertex2f(width+10,0);
     glEnd();
-    //glRectf(WIDTH/2.0-5-glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207,WIDTH/2.0+5+glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"PLAY")*.3/2,HEIGHT-207+glutStrokeHeight(GLUT_STROKE_ROMAN)*.3);
     if(outlined)
     {
     	// Draw outline if specified
@@ -238,14 +235,11 @@ void menuLoop()
     glPushMatrix();
     glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse");
-    //cout<<glutStrokeHeight(GLUT_STROKE_ROMAN)<<" "<<glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse")<<endl;
     glPopMatrix();
     glPushMatrix();
     glTranslatef(WIDTH/2.0-getButtonWidth("PLAY")/2.0,HEIGHT-200,0);
     drawButton("PLAY",R_keys::CURSOR==0);
     glPopMatrix();
-
-
 
     glPushMatrix();
     glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
@@ -265,10 +259,7 @@ void gameLoop()
     glClear(GL_COLOR_BUFFER_BIT );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-	//Update physics
-	//R_physics::stepPhysics();
 
-    //setLetter('R');
     setLetter(R_physics::curLetter);
 
     //display score
@@ -293,15 +284,10 @@ void gameLoop()
     }
     glPushMatrix();
 
-    // TODO:should use global box variables for drawing character quad
     glBegin(GL_POLYGON);
-        /*glTexCoord2d(0,0);  glVertex2f(0+50,0+50);
-        glTexCoord2d(0,1);  glVertex2f(0+50,R_images::samHeight[0]+50);
-        glTexCoord2d(1,1);  glVertex2f(R_images::samWidth[0]+50,R_images::samHeight[0]+50);
-        glTexCoord2d(1,0);  glVertex2f(R_images::samWidth[0]+50,0+50);*/
 
-    	float p00x = getScaled(R_physics::getPlayerX(), true);// - R_images::samWidth[0]/2.0;
-    	float p00y = getScaled(R_physics::getPlayerY(), false);// - R_images::samHeight[0]/2.0;
+    	float p00x = getScaled(R_physics::getPlayerX(), true);
+    	float p00y = getScaled(R_physics::getPlayerY(), false);
         float p01x = p00x;
         float p01y = getScaled(R_physics::getPlayerY()+R_physics::playerHeight*2.0, false);
         float p11x = getScaled(R_physics::getPlayerX()+R_physics::playerWidth*2.0, true);
@@ -317,7 +303,7 @@ void gameLoop()
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
-    //draw ground... TODO:use actual values later
+    //draw ground... 
     glPushMatrix();
     glBegin(GL_POLYGON);
         glColor3ub(0xF4,0x43,0x36);
@@ -325,8 +311,6 @@ void gameLoop()
         glVertex2f(WIDTH,0);
 
         glColor3ub(0xC6,0x28,0x28);
-        //glVertex2f(WIDTH,50);
-        //glVertex2f(0,50);
 
         float g_height = getScaled(R_physics::groundHeight, false);
         glVertex2f(WIDTH,g_height);
@@ -347,7 +331,8 @@ void gameLoop()
                 wid=R_physics::dashWidth;
                 hei=R_physics::dashHeight;
             }
-            float x0=(float)R_physics::triPos[i][0];
+
+            float x0=(float)R_physics::triPos[i][0]-wid/2.0;
             float y0=(float)R_physics::groundHeight;
             float x1=x0+wid/2.0;
             float y1=y0+hei;
@@ -356,8 +341,6 @@ void gameLoop()
             glVertex2f(getScaled(x0,true),getScaled(y0,false));
             glVertex2f(getScaled(x1,true),getScaled(y1,false));
             glVertex2f(getScaled(x2,true),getScaled(y2,false));
-
-            //cout<<getScaled(x0,true)<<":"<<
         }
     }
     glEnd();
@@ -446,7 +429,7 @@ static void display(void)
     case R_states::PAUSE:
         pauseLoop();break;
     case R_states::GAMEOVER:
-        //overLoop();
+        overLoop();
         break;
     }
     // FPS calculation
