@@ -1,5 +1,6 @@
 # ReMorse  (_REpresentative MORSe Educator_)
 [![Build Status](https://travis-ci.com/RaghavaDhanya/ReMorse.svg?token=ZdVZPoHAtDUzhsKvcU44&branch=master)](https://travis-ci.com/RaghavaDhanya/ReMorse)
+[![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/RaghavaDhanya/ReMorse/blob/master/LICENSE)
 ### Morse Code 
 
 Morse code is a method of transmitting text information as a series of on-off tones, lights, or clicks that can be directly understood by a skilled listener or observer without special equipment. It is named for Samuel F. B. Morse, an inventor of the telegraph. 
