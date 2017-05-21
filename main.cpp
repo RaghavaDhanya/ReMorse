@@ -252,6 +252,7 @@ void menuLoop()
     glRasterPos2i(WIDTH/2-(R_images::logoWidth/2),0);
     glDrawPixels(R_images::logoWidth,R_images::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::logo[0]);
     glPopMatrix();
+    glFlush();
 }
 
 void gameLoop()
@@ -303,7 +304,7 @@ void gameLoop()
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
-    //draw ground... 
+    //draw ground...
     glPushMatrix();
     glBegin(GL_POLYGON);
         glColor3ub(0xF4,0x43,0x36);
@@ -345,6 +346,7 @@ void gameLoop()
     }
     glEnd();
     glPopMatrix();
+    glFlush();
 }
 
 void pauseLoop()
@@ -369,6 +371,7 @@ void pauseLoop()
     glTranslatef(WIDTH/2.0-getButtonWidth("MENU")/2.0,HEIGHT-260,0);
     drawButton("MENU",R_keys::CURSOR==1);
     glPopMatrix();
+    glFlush();
 
 }
 void overLoop()
@@ -390,6 +393,7 @@ void overLoop()
     glScalef(.2,.2,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"Press any key to continue.");
     glPopMatrix();
+    glFlush();
 }
 static void resize(int width, int height)
 {
