@@ -82,7 +82,7 @@ namespace R_keys
     void over_key(unsigned char key, int x, int y)
     {
         //To prevent immediate skip after game over
-        if(key != GLUT_KEY_UP)
+        if(key!=GLUT_KEY_UP && key!='w' && key!='W' && key!=' ')
             R_states::STATE=R_states::MENU;
     }
     void game_key(unsigned char key, int x, int y)

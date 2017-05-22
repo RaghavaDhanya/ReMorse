@@ -505,8 +505,9 @@ class ObstacleManager
         	{
         		for(int k = 0; k < 15; ++k)
         		{
-        			arr[arrIndex][0] = buffer[i].getBodyPos(k);
-        			arr[arrIndex][1] = buffer[i].getBodyType(k);
+                    bool bufExists = i < letterQueue.length();
+        			arr[arrIndex][0] = bufExists? buffer[i].getBodyPos(k) : -1;
+        			arr[arrIndex][1] = bufExists? buffer[i].getBodyType(k) : -1;
         			++arrIndex;
         		}
         	}
@@ -726,7 +727,7 @@ void R_physics::stepPhysics()
 	player->setJump(jumpForceOn);
 
 	R_physics::curLetter = toupper(manager->getDisplayChar());
-	manager->update();
+    manager->update();
 	manager->updateTriPos(R_physics::triPos);
 
 	m_world->Step(timeStep, velocityIterations, positionIterations);
