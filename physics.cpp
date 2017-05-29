@@ -617,6 +617,9 @@ ContactListener* contactListener;
 
 bool needInit = true;
 
+const int key1 = 633;
+const int key2 = 971;
+
 static const string highScoreFileName = ".skyho";
 
 string getRandomSequence(int size)
@@ -641,10 +644,15 @@ string getRandomSequence(int size)
 
 void readHighScore()
 {
+    int r1, r2;
 	ifstream scoreFile;
 	scoreFile.open(highScoreFileName);
-	scoreFile>>HIGHSCORE;
+	scoreFile>>r1>>r2;
+    r1 ^= key1;
+    r2 ^= key2;
 	scoreFile.close();
+
+    HIGHSCORE = (r1 == r2) ? r1 : 0;
 
 	cout<<"Score from file:"<<HIGHSCORE<<"\n";
 }
@@ -653,7 +661,9 @@ void writeHighScore(long long score)
 {
 	ofstream scoreFile;
 	scoreFile.open(highScoreFileName, ios::trunc);
-	scoreFile<<score;
+    int s1 = score^key1;
+    int s2 = score^key2;
+	scoreFile<<s1<<" "<<s2;
 	scoreFile.close();
 }
 
@@ -719,7 +729,7 @@ void R_physics::stepPhysics()
 		m_world->SetContactListener(contactListener);
 		player->setGroundPos(R_physics::groundHeight);
 		manager->setGroundLevel(R_physics::groundHeight);
-		manager->init(m_world,getRandomSequence(10));
+		manager->init(m_world,getRandomSequence(50));
 		needInit = false;
 	}
 

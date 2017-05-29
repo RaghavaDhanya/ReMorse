@@ -11,7 +11,7 @@
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
-
+auto reInitBuffer = glutStrokeCharacter;
 //To scale coordinates from physics world to graphics
 float B2_SCALEX = 100.0;
 float B2_SCALEY = 100.0;
@@ -19,6 +19,7 @@ float B2_OFFSETX = -225.0;
 float B2_OFFSETY = -400.0;
 
 //THINK: where to put score, may be in the values given by backend
+auto BUF1 = GLUT_STROKE_ROMAN; 
 
 // THINK:Where the hell do I keep this texname variable?
 // may be make static put inside the function? BTW this for loading texture
@@ -186,7 +187,7 @@ void drawButton(const char* str,bool outlined)
     glScalef(.3,.3,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)str);
 }
-void xt_buf_regenerate()
+void bufferRegenerate()
 {
     glColor3ub(0x22,0x22,0x22);
     glPushMatrix();
@@ -195,7 +196,7 @@ void xt_buf_regenerate()
     glLineWidth(2);
     int buf_offset = 60;
     for(int i = 0; i < 16; ++i)
-        glutStrokeCharacter(GLUT_STROKE_ROMAN,(char)(int)R_physics::triPos[i+buf_offset][0]);
+        reInitBuffer(BUF1,(char)(int)R_physics::triPos[i+buf_offset][0]);
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,25,0);
@@ -203,7 +204,7 @@ void xt_buf_regenerate()
     glLineWidth(2);
     buf_offset = 76;
     for(int i = 0; i <9; ++i)
-        glutStrokeCharacter(GLUT_STROKE_ROMAN,(char)(int)R_physics::triPos[i+buf_offset][0]);
+        reInitBuffer(BUF1,(char)(int)R_physics::triPos[i+buf_offset][0]);
     glPopMatrix();
 }
 float getButtonWidth(const char* str)
@@ -245,9 +246,7 @@ void menuLoop()
     glTranslatef(WIDTH/2.0-getButtonWidth("QUIT")/2.0,HEIGHT-260,0);
     drawButton("QUIT",R_keys::CURSOR==1);
     glPopMatrix();
-
-    xt_buf_regenerate();
-
+    bufferRegenerate();
     glPushMatrix();
     glRasterPos2i(WIDTH/2-(R_images::logoWidth/2),0);
     glDrawPixels(R_images::logoWidth,R_images::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::logo[0]);
