@@ -265,11 +265,18 @@ void gameLoop()
     //display score
     //why StringStream? Cuz to_string() doesn't freaking work in mingw compiler
     glLineWidth(3);
-    ostringstream stm;
-    stm<<"$:"<<R_physics::SCORE;
     glColor3ub(0xff,0xff,0xff);
     glPushMatrix();
     glTranslatef(5,HEIGHT-40,0);
+    glScalef(.3,.3,0);
+    ostringstream stm;
+    stm<<R_physics::SCORE;
+    glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)stm.str().c_str());
+    stm.str("");
+    glPopMatrix();
+    glPushMatrix();
+    stm<<"$"<<R_physics::HIGHSCORE;
+    glTranslatef(WIDTH- getButtonWidth(stm.str().c_str()),HEIGHT-40,0);
     glScalef(.3,.3,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)stm.str().c_str());
     glPopMatrix();
