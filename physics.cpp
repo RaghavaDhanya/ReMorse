@@ -602,8 +602,6 @@ string letterToMorse(char let)
 /////////////////////////// MAIN ///////////////////////////
 ////////////////////////////////////////////////////////////
 
-long long HIGHSCORE = 0;
-
 float32 timeStep = 1.0f / 60.0f;
 int32 velocityIterations = 10;
 int32 positionIterations = 10;
@@ -642,31 +640,6 @@ string getRandomSequence(int size)
 	return rStr;
 }
 
-void readHighScore()
-{
-    int r1, r2;
-	ifstream scoreFile;
-	scoreFile.open(highScoreFileName);
-	scoreFile>>r1>>r2;
-    r1 ^= key1;
-    r2 ^= key2;
-	scoreFile.close();
-
-    HIGHSCORE = (r1 == r2) ? r1 : 0;
-
-	cout<<"Score from file:"<<HIGHSCORE<<"\n";
-}
-
-void writeHighScore(long long score)
-{
-	ofstream scoreFile;
-	scoreFile.open(highScoreFileName, ios::trunc);
-    int s1 = score^key1;
-    int s2 = score^key2;
-	scoreFile<<s1<<" "<<s2;
-	scoreFile.close();
-}
-
 //For explanation, check physics.h
 namespace R_physics
 {
@@ -680,6 +653,7 @@ namespace R_physics
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
+    long long HIGHSCORE = 0;
     float triPos[85][2] ={
     	{45.0,1.0},{40.0,1.0},{152.0,0.0},{170.0,1.0},{120.0,1.0},{59.0,0.0},{25.0,0.0},{140.0,0.0},{226.0,0.0},{184.0,0.0},{219.0,1.0},{70.0,1.0},{213.0,1.0},{91.0,0.0},{180.0,0.0},
     	{184.0,1.0},{2.0,1.0},{59.0,1.0},{134.0,1.0},{130.0,1.0},{98.0,1.0},{221.0,0.0},{42.0,1.0},{163.0,1.0},{229.0,0.0},{189.0,1.0},{186.0,0.0},{154.0,1.0},{51.0,1.0},{176.0,1.0},{130.0,1.0},
@@ -693,6 +667,31 @@ namespace R_physics
     float getPlayerY();
     void stepPhysics();
     void resetPhysics();
+}
+
+void readHighScore()
+{
+    int r1, r2;
+    ifstream scoreFile;
+    scoreFile.open(highScoreFileName);
+    scoreFile>>r1>>r2;
+    r1 ^= key1;
+    r2 ^= key2;
+    scoreFile.close();
+
+    R_physics::HIGHSCORE = (r1 == r2) ? r1 : 0;
+
+    cout<<"Score from file:"<<R_physics::HIGHSCORE<<"\n";
+}
+
+void writeHighScore(long long score)
+{
+    ofstream scoreFile;
+    scoreFile.open(highScoreFileName, ios::trunc);
+    int s1 = score^key1;
+    int s2 = score^key2;
+    scoreFile<<s1<<" "<<s2;
+    scoreFile.close();
 }
 
 float R_physics::getPlayerX()
@@ -753,7 +752,7 @@ void R_physics::stepPhysics()
 
 void R_physics::resetPhysics()
 {
-	if(R_physics::SCORE > HIGHSCORE)
+	if(R_physics::SCORE > R_physics::HIGHSCORE)
 		writeHighScore(R_physics::SCORE);
 
 	needInit = true;

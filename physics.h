@@ -12,7 +12,7 @@ namespace R_physics
 	extern bool jumpForceOn;			//Set to true to make player jump and hover. Set to false to make player fall if in the air
 	extern long long SCORE;
 	extern float triPos[85][2];
-
+	extern long long HIGHSCORE;
 	float getPlayerX();
     float getPlayerY();					//x and y coordinates of player in physics system. SCALE BEFORE USE.
 	void stepPhysics();					//Call this in each iteration to update the physics world
