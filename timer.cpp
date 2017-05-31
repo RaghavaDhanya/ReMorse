@@ -10,7 +10,6 @@ void timer(int value)
 {
     if(R_states::STATE==R_states::GAME && value==UPDATE)
     {
-        //call update here
 
     	//Update physics
 		R_physics::stepPhysics();
@@ -18,5 +17,6 @@ void timer(int value)
         R_physics::SCORE++;
         glutTimerFunc(12,timer,UPDATE);
     }
+    glutPostRedisplay();
     //cout<<"timer::"<<SCORE<<endl;
 }

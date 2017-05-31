@@ -130,7 +130,7 @@ namespace R_keys
                             over_key(key,x,y);break;
         }
 
-        //glutPostRedisplay();
+        glutPostRedisplay();
     }
     void keyup(unsigned char key, int x, int y)
     {
@@ -144,6 +144,7 @@ namespace R_keys
             case R_states::PAUSE:
                             break;
         }
+        glutPostRedisplay();
     }
     void splkey(int key, int x, int y)
     {
@@ -159,6 +160,7 @@ namespace R_keys
             case R_states::GAMEOVER:
                             over_key(key,x,y);break;
         }
+        glutPostRedisplay();
     }
     void splkeyup(int key, int x, int y)
     {
@@ -172,6 +174,7 @@ namespace R_keys
             case R_states::PAUSE:
                             break;
         }
+        glutPostRedisplay();
     }
 
 

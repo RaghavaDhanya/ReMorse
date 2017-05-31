@@ -8,6 +8,7 @@
 #include "keys.h"
 #include "timer.h"
 #include "physics.h"
+
 // THINK:maybe height and width should be in settings?
 int HEIGHT = 600;
 int WIDTH = 800;
@@ -19,7 +20,7 @@ float B2_OFFSETX = -225.0;
 float B2_OFFSETY = -400.0;
 
 //THINK: where to put score, may be in the values given by backend
-auto BUF1 = GLUT_STROKE_ROMAN; 
+auto BUF1 = GLUT_STROKE_ROMAN;
 
 // THINK:Where the hell do I keep this texname variable?
 // may be make static put inside the function? BTW this for loading texture
@@ -123,7 +124,6 @@ namespace R_images
 */
 void setTexture(vector<unsigned char> img, unsigned width, unsigned height)
 {
-    glGenTextures(1, &texname);
     glBindTexture(GL_TEXTURE_2D, texname);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -237,6 +237,7 @@ void menuLoop()
     glTranslatef(WIDTH/2.0-250,HEIGHT-110,0);
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)"ReMorse");
     glPopMatrix();
+
     glPushMatrix();
     glTranslatef(WIDTH/2.0-getButtonWidth("PLAY")/2.0,HEIGHT-200,0);
     drawButton("PLAY",R_keys::CURSOR==0);
@@ -251,6 +252,7 @@ void menuLoop()
     glRasterPos2i(WIDTH/2-(R_images::logoWidth/2),0);
     glDrawPixels(R_images::logoWidth,R_images::logoHeight, GL_RGBA, GL_UNSIGNED_BYTE, &R_images::logo[0]);
     glPopMatrix();
+
     glFlush();
 }
 
@@ -274,6 +276,7 @@ void gameLoop()
     glutStrokeString(GLUT_STROKE_ROMAN,(unsigned char*)stm.str().c_str());
     stm.str("");
     glPopMatrix();
+
     glPushMatrix();
     stm<<"$"<<R_physics::HIGHSCORE;
     glTranslatef(WIDTH- getButtonWidth(stm.str().c_str()),HEIGHT-40,0);
@@ -292,7 +295,8 @@ void gameLoop()
     glPushMatrix();
 
     glBegin(GL_POLYGON);
-
+    {
+        //scoping so that these variables aren't accessible elsewhere
     	float p00x = getScaled(R_physics::getPlayerX(), true);
     	float p00y = getScaled(R_physics::getPlayerY(), false);
         float p01x = p00x;
@@ -306,7 +310,7 @@ void gameLoop()
         glTexCoord2d(0,1);  glVertex2f(p01x, p01y);
         glTexCoord2d(1,1);  glVertex2f(p11x, p11y);
         glTexCoord2d(1,0);  glVertex2f(p10x, p10y);
-
+    }
     glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
@@ -462,7 +466,7 @@ static void idle(void)
     {
       cerr << "OpenGL ERROR: " << gluErrorString(err) << endl;
     }
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 /**
     Do anti alias if set in settings
@@ -495,6 +499,7 @@ int main(int argc, char *argv[])
 {
     //TODO:should put this in init
     R_images::loadImages();
+    glGenTextures(1, &texname);
     glutInit(&argc, argv);
     glutInitWindowSize(WIDTH,HEIGHT);
     glutInitWindowPosition(10,10);
