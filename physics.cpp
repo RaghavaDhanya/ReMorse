@@ -30,9 +30,7 @@ struct Config
 //To identify body during collision
 struct BodyID
 {
-    //True if player, false if obstacle
-    bool isPlayer;
-
+    bool isPlayer;	//True if player, false if obstacle
     bool isDot;
 };
 
@@ -643,7 +641,8 @@ string getRandomSequence(int size)
 //For explanation, check physics.h
 namespace R_physics
 {
-	float groundHeight = 5;			//wall.getHeight();
+	//TODO: fix multiple declarations
+	float groundHeight = 5;			//wall.getHeight();	
 	float playerWidth = 1.10/2.0;
 	float playerHeight = 1.86/2.0;
 	float dotWidth = 0.9;

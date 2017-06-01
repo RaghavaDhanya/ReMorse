@@ -328,6 +328,7 @@ void gameLoop()
         glVertex2f(0,g_height);
     glEnd();
     glPopMatrix();
+
     glPushMatrix();
     glColor3ub(0x00,0x00,0x00);
     glBegin(GL_TRIANGLES);
