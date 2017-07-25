@@ -23,14 +23,14 @@ string letterToMorse(char let);
 //Hold position and angle data
 struct Config
 {
-	float x, y;
-	float angle;
+    float x, y;
+    float angle;
 };
 
 //To identify body during collision
 struct BodyID
 {
-    bool isPlayer;	//True if player, false if obstacle
+    bool isPlayer;    //True if player, false if obstacle
     bool isDot;
 };
 
@@ -41,7 +41,7 @@ struct BodyID
 //Generic physical object
 class PhysicalObject
 {
-	//'Publicly' deriving subclasses will have these as private members
+    //'Publicly' deriving subclasses will have these as private members
     protected:
         b2Body *body;
         b2World *world;
@@ -127,13 +127,13 @@ class Player: public PhysicalObject
 
         void setGroundPos(int pos)
         {
-        	GROUND_POS = pos;
+            GROUND_POS = pos;
         }
 
         void setPos(int x, int y)
         {
-        	body->SetLinearVelocity(b2Vec2(0, 0));
-        	body->SetTransform(b2Vec2(x, y), 0);
+            body->SetLinearVelocity(b2Vec2(0, 0));
+            body->SetTransform(b2Vec2(x, y), 0);
         }
 
         /* When called with true, player will jump with initial impulse, and hover there.
@@ -212,7 +212,7 @@ class Wall: public PhysicalObject
 
         float getHeight()
         {
-        	return HEIGHT;
+            return HEIGHT;
         }
 };
 
@@ -272,7 +272,7 @@ class Obstacle
         id->isPlayer = false;
         id->isDot = false;
         if(base == DOT_WIDTH)
-        	id->isDot = true;
+            id->isDot = true;
         bodies[index]->SetUserData(id);
 
         //Triangle fixture vertices relative to BodyDef position as origin
@@ -373,7 +373,7 @@ class Obstacle
 
         void setGroundLevel(int gLevel)
         {
-        	groundLevel = gLevel;
+            groundLevel = gLevel;
         }
 
         //Returns right most coordinate of last body in the array(bottom right vertex)
@@ -399,18 +399,18 @@ class Obstacle
 
         float getBodyPos(int index)
         {
-        	if(bodies[index])
-        		return bodies[index]->GetPosition().x;
+            if(bodies[index])
+                return bodies[index]->GetPosition().x;
 
-        	return -1;
+            return -1;
         }
 
         int getBodyType(int index)
         {
-        	if(bodies[index])
-        		return (static_cast<BodyID*>(bodies[index]->GetUserData()))->isDot;
+            if(bodies[index])
+                return (static_cast<BodyID*>(bodies[index]->GetUserData()))->isDot;
 
-        	return -1;
+            return -1;
         }
 
         char getCurLetter()
@@ -446,7 +446,7 @@ class ObstacleManager
         //Call to reinitialize. There is no reset method for ObstacleManager because the physics bodies are explicitly destroyed on collision.
         void init(b2World* world, string text)
         {
-        	//Create the first obstacle with required x position
+            //Create the first obstacle with required x position
             buffer[0] = Obstacle(world, 40);
             buffer[0].setGroundLevel(groundLevel);
             buffer[0].setLetter(text[0]);
@@ -498,22 +498,22 @@ class ObstacleManager
 
         void updateTriPos(float arr[85][2])
         {
-        	int arrIndex = 0;
-        	for(int i = 0; i < BUFFER_SIZE; ++i)
-        	{
-        		for(int k = 0; k < 15; ++k)
-        		{
+            int arrIndex = 0;
+            for(int i = 0; i < BUFFER_SIZE; ++i)
+            {
+                for(int k = 0; k < 15; ++k)
+                {
                     bool bufExists = i < letterQueue.length();
-        			arr[arrIndex][0] = bufExists? buffer[i].getBodyPos(k) : -1;
-        			arr[arrIndex][1] = bufExists? buffer[i].getBodyType(k) : -1;
-        			++arrIndex;
-        		}
-        	}
+                    arr[arrIndex][0] = bufExists? buffer[i].getBodyPos(k) : -1;
+                    arr[arrIndex][1] = bufExists? buffer[i].getBodyType(k) : -1;
+                    ++arrIndex;
+                }
+            }
         }
 
         void setGroundLevel(int level)
         {
-        	groundLevel = level;
+            groundLevel = level;
         }
 
         char getDisplayChar()
@@ -559,15 +559,15 @@ class ContactListener: public b2ContactListener
                 //One is player and the other is obstacle
                 if( (aID->isPlayer==true && bID->isPlayer==false)
                     || (aID->isPlayer==false && bID->isPlayer==true) )
-            	{
-            		collided = true;
-            		cout<<"Collide aithu\n";
-            	}
+                {
+                    collided = true;
+                    cout<<"Collide aithu\n";
+                }
         }
 
         void reset()
         {
-        	collided = false;
+            collided = false;
         }
 };
 
@@ -575,25 +575,25 @@ class ContactListener: public b2ContactListener
 //TODO: Add morse code for numbers
 string letterToMorse(char let)
 {
-	//Reference: https://en.wikipedia.org/wiki/Morse_code#/media/File:International_Morse_Code.svg
-	switch(let=toupper(let))
-	{
-		case 'A': return ".-";		case 'B': return "-...";
-		case 'C': return "-.-.";	case 'D': return "-..";
-		case 'E': return ".";		case 'F': return "..-.";
-		case 'G': return "--.";		case 'H': return "....";
-		case 'I': return "..";		case 'J': return ".---";
-		case 'K': return "-.-";		case 'L': return ".-..";
-		case 'M': return "--";		case 'N': return "-.";
-		case 'O': return "---";		case 'P': return ".--.";
-		case 'Q': return "--.-";	case 'R': return ".-.";
-		case 'S': return "...";		case 'T': return "-";
-		case 'U': return "..-";		case 'V': return "...-";
-		case 'W': return ".--";		case 'X': return "-..-";
-		case 'Y': return "-.--";	case 'Z': return "--..";
-	}
+    //Reference: https://en.wikipedia.org/wiki/Morse_code#/media/File:International_Morse_Code.svg
+    switch(let=toupper(let))
+    {
+        case 'A': return ".-";        case 'B': return "-...";
+        case 'C': return "-.-.";    case 'D': return "-..";
+        case 'E': return ".";        case 'F': return "..-.";
+        case 'G': return "--.";        case 'H': return "....";
+        case 'I': return "..";        case 'J': return ".---";
+        case 'K': return "-.-";        case 'L': return ".-..";
+        case 'M': return "--";        case 'N': return "-.";
+        case 'O': return "---";        case 'P': return ".--.";
+        case 'Q': return "--.-";    case 'R': return ".-.";
+        case 'S': return "...";        case 'T': return "-";
+        case 'U': return "..-";        case 'V': return "...-";
+        case 'W': return ".--";        case 'X': return "-..-";
+        case 'Y': return "-.--";    case 'Z': return "--..";
+    }
 
-	return "0";
+    return "0";
 }
 
 ////////////////////////////////////////////////////////////
@@ -620,47 +620,47 @@ static const string highScoreFileName = ".skyho";
 
 string getRandomSequence(int size)
 {
-	unsigned seed= time(0);
+    unsigned seed= time(0);
     srand(seed);
 
-	char rChar = 'a' + rand() % 26;
-	string rStr = "";
-	rStr += rChar;
-	int i;
+    char rChar = 'a' + rand() % 26;
+    string rStr = "";
+    rStr += rChar;
+    int i;
 
-	for(i = 1; i < size; ++i)
-	{
-		while( (rChar ='a'+rand()%26) == rStr[i-1] ) ;
-		rStr += rChar;
-	}
+    for(i = 1; i < size; ++i)
+    {
+        while( (rChar ='a'+rand()%26) == rStr[i-1] ) ;
+        rStr += rChar;
+    }
 
-	cout<<"Generated string: "<<rStr<<"\n";
-	return rStr;
+    cout<<"Generated string: "<<rStr<<"\n";
+    return rStr;
 }
 
 //For explanation, check physics.h
 namespace R_physics
 {
-	//TODO: fix multiple declarations
-	float groundHeight = 5;			//wall.getHeight();	
-	float playerWidth = 1.10/2.0;
-	float playerHeight = 1.86/2.0;
-	float dotWidth = 0.9;
-	float dotHeight = 0.8;
-	float dashWidth = 0.6;
-	float dashHeight = 0.5;
+    //TODO: fix multiple declarations
+    float groundHeight = 5;            //wall.getHeight();    
+    float playerWidth = 1.10/2.0;
+    float playerHeight = 1.86/2.0;
+    float dotWidth = 0.9;
+    float dotHeight = 0.8;
+    float dashWidth = 0.6;
+    float dashHeight = 0.5;
     char curLetter = ' ';
     bool jumpForceOn = false;
     long long SCORE = 0;
     long long HIGHSCORE = 0;
     float triPos[85][2] ={
-    	{45.0,1.0},{40.0,1.0},{152.0,0.0},{170.0,1.0},{120.0,1.0},{59.0,0.0},{25.0,0.0},{140.0,0.0},{226.0,0.0},{184.0,0.0},{219.0,1.0},{70.0,1.0},{213.0,1.0},{91.0,0.0},{180.0,0.0},
-    	{184.0,1.0},{2.0,1.0},{59.0,1.0},{134.0,1.0},{130.0,1.0},{98.0,1.0},{221.0,0.0},{42.0,1.0},{163.0,1.0},{229.0,0.0},{189.0,1.0},{186.0,0.0},{154.0,1.0},{51.0,1.0},{176.0,1.0},{130.0,1.0},
-    	{154.0,0.0},{102.0,1.0},{188.0,0.0},{104.0,1.0},{72.0,0.0},{17.0,0.0},{166.0,1.0},{152.0,1.0},{241.0,1.0},{246.0,1.0},{139.0,1.0},{227.0,0.0},{36.0,0.0},{189.0,1.0},{241.0,1.0},
-    	{52.0,1.0},{225.0,0.0},{74.0,0.0},{186.0,0.0},{151.0,1.0},{174.0,1.0},{192.0,0.0},{28.0,1.0},{81.0,0.0},{205.0,1.0},{212.0,1.0},{27.0,0.0},{90.0,0.0},{83.0,1.0},
-    	{82.0,0.0},{97.0,1.0},{103.0,1.0},{104.0,0.0},{97.0,1.0},{118.0,1.0},{97.0,0.0},{32.0,0.0},{71.0,1.0},{32.0,1.0},{68.0,0.0},{104.0,1.0},{97.0,1.0},{110.0,0.0},{121.0,1.0},{97.0,0.0},
-		{82.0,1.0},{97.0,0.0},{118.0,0.0},{105.0,1.0},{107.0,1.0},{105.0,0.0},{114.0,1.0},{97.0,1.0},{110.0,0.0}
-	};
+        {45.0,1.0},{40.0,1.0},{152.0,0.0},{170.0,1.0},{120.0,1.0},{59.0,0.0},{25.0,0.0},{140.0,0.0},{226.0,0.0},{184.0,0.0},{219.0,1.0},{70.0,1.0},{213.0,1.0},{91.0,0.0},{180.0,0.0},
+        {184.0,1.0},{2.0,1.0},{59.0,1.0},{134.0,1.0},{130.0,1.0},{98.0,1.0},{221.0,0.0},{42.0,1.0},{163.0,1.0},{229.0,0.0},{189.0,1.0},{186.0,0.0},{154.0,1.0},{51.0,1.0},{176.0,1.0},{130.0,1.0},
+        {154.0,0.0},{102.0,1.0},{188.0,0.0},{104.0,1.0},{72.0,0.0},{17.0,0.0},{166.0,1.0},{152.0,1.0},{241.0,1.0},{246.0,1.0},{139.0,1.0},{227.0,0.0},{36.0,0.0},{189.0,1.0},{241.0,1.0},
+        {52.0,1.0},{225.0,0.0},{74.0,0.0},{186.0,0.0},{151.0,1.0},{174.0,1.0},{192.0,0.0},{28.0,1.0},{81.0,0.0},{205.0,1.0},{212.0,1.0},{27.0,0.0},{90.0,0.0},{83.0,1.0},
+        {82.0,0.0},{97.0,1.0},{103.0,1.0},{104.0,0.0},{97.0,1.0},{118.0,1.0},{97.0,0.0},{32.0,0.0},{71.0,1.0},{32.0,1.0},{68.0,0.0},{104.0,1.0},{97.0,1.0},{110.0,0.0},{121.0,1.0},{97.0,0.0},
+        {82.0,1.0},{97.0,0.0},{118.0,0.0},{105.0,1.0},{107.0,1.0},{105.0,0.0},{114.0,1.0},{97.0,1.0},{110.0,0.0}
+    };
 
     float getPlayerX();
     float getPlayerY();
@@ -695,72 +695,72 @@ void writeHighScore(long long score)
 
 float R_physics::getPlayerX()
 {
-	if(player)
-		return player->getXPos();
+    if(player)
+        return player->getXPos();
 
-	return 4;
+    return 4;
 }
 
 float R_physics::getPlayerY()
 {
-	if(player)
-		return player->getYPos();
+    if(player)
+        return player->getYPos();
 
-	return 0;
+    return 0;
 }
 
 void R_physics::stepPhysics()
 {
-	//Initialize stuff for the first time
-	if(needInit)
-	{
-		R_physics::SCORE = 0;
-		readHighScore();
+    //Initialize stuff for the first time
+    if(needInit)
+    {
+        R_physics::SCORE = 0;
+        readHighScore();
 
-		m_world = new b2World(b2Vec2(0, -50));
+        m_world = new b2World(b2Vec2(0, -50));
 
-		player = new Player(m_world, {4, 14, 0});
-		wall = new Wall(m_world, {0, 0, 0});
-		manager = new ObstacleManager();
-		contactListener = new ContactListener();
+        player = new Player(m_world, {4, 14, 0});
+        wall = new Wall(m_world, {0, 0, 0});
+        manager = new ObstacleManager();
+        contactListener = new ContactListener();
 
-		m_world->SetContactListener(contactListener);
-		player->setGroundPos(R_physics::groundHeight);
-		manager->setGroundLevel(R_physics::groundHeight);
-		manager->init(m_world,getRandomSequence(50));
-		needInit = false;
-	}
+        m_world->SetContactListener(contactListener);
+        player->setGroundPos(R_physics::groundHeight);
+        manager->setGroundLevel(R_physics::groundHeight);
+        manager->init(m_world,getRandomSequence(50));
+        needInit = false;
+    }
 
     //Make player jump if true
-	player->setJump(jumpForceOn);
+    player->setJump(jumpForceOn);
 
-	R_physics::curLetter = toupper(manager->getDisplayChar());
+    R_physics::curLetter = toupper(manager->getDisplayChar());
     manager->update();
-	manager->updateTriPos(R_physics::triPos);
+    manager->updateTriPos(R_physics::triPos);
 
-	m_world->Step(timeStep, velocityIterations, positionIterations);
+    m_world->Step(timeStep, velocityIterations, positionIterations);
 
-	//On collision with obstacle
-	if(contactListener->hasCollided())
-	{
-		R_physics::resetPhysics();
-		//Set as game over
-	    R_states::STATE = R_states::GAMEOVER;
-	}
+    //On collision with obstacle
+    if(contactListener->hasCollided())
+    {
+        R_physics::resetPhysics();
+        //Set as game over
+        R_states::STATE = R_states::GAMEOVER;
+    }
 }
 
 void R_physics::resetPhysics()
 {
-	if(R_physics::SCORE > R_physics::HIGHSCORE)
-		writeHighScore(R_physics::SCORE);
+    if(R_physics::SCORE > R_physics::HIGHSCORE)
+        writeHighScore(R_physics::SCORE);
 
-	needInit = true;
-	R_physics::curLetter = ' ';
-	R_physics::jumpForceOn = false;
+    needInit = true;
+    R_physics::curLetter = ' ';
+    R_physics::jumpForceOn = false;
 
-    delete player;				player = NULL;
-    delete wall;				wall = NULL;
-    delete contactListener;		contactListener = NULL;
-    delete manager;				manager=NULL;
-    delete m_world;        		m_world=NULL;
+    delete player;                player = NULL;
+    delete wall;                wall = NULL;
+    delete contactListener;        contactListener = NULL;
+    delete manager;                manager=NULL;
+    delete m_world;                m_world=NULL;
 }

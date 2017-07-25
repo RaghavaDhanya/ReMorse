@@ -28,7 +28,7 @@ GLuint texname;
 using namespace std;
 namespace R_settings
 {
-	// TODO:put more things here
+    // TODO:put more things here
     bool ANTIALIAS=true;
     int MINWIDTH=640;
     int MINHEIGHT=550;
@@ -36,7 +36,7 @@ namespace R_settings
 
 namespace R_images
 {
-	// THINK:not sure if this is the right way to store images and its properties
+    // THINK:not sure if this is the right way to store images and its properties
     const char* logoName="res/morse.png";
     vector<unsigned char> logo;
     unsigned logoWidth;
@@ -47,29 +47,29 @@ namespace R_images
     unsigned samHeight[4];
 
     /** OpenGL seems to draw images vertically flipped
-    	this function inverts our data so that it displays correctly
-    	@param img is our image data vector
-    	@param width is our image width
-    	@param height is our image height
+        this function inverts our data so that it displays correctly
+        @param img is our image data vector
+        @param width is our image width
+        @param height is our image height
     */
     void invert(vector<unsigned char> &img,const unsigned width,const unsigned height)
     {
-        unsigned char *imagePtr = &img[0];
-        unsigned char *top = NULL;
-        unsigned char *bottom = NULL;
+        unsigned char *imageptr = &img[0];
+        unsigned char *first = NULL;
+        unsigned char *last = NULL;
         unsigned char temp = 0;
         for( int h = 0; h <(int) height/2; ++h )
         {
 
-            top = imagePtr + h * width * 4;
-            bottom = imagePtr + (height - h - 1) * width*4;
-            for( int w = 0; w < (int)width*4; ++w )
+            first = imageptr + h * width * 4;
+            last = imageptr + (height - h - 1) * width*4;
+            for( int i = 0; i < (int)width*4; ++i )
             {
-                temp = *top;
-                *top = *bottom;
-                *bottom = temp;
-                ++top;
-                ++bottom;
+                temp = *first;
+                *first = *last;
+                *last = temp;
+                ++first;
+                ++last;
             }
         }
     }
@@ -77,7 +77,7 @@ namespace R_images
     */
     void loadImages()
     {
-    	//THINK:we are doing the same if else many times may be make a function?
+        //THINK:we are doing the same if else many times may be make a function?
         int error;
         if((error=lodepng::decode(logo,logoWidth,logoHeight,logoName)))
         {
@@ -157,9 +157,9 @@ void setLetter(char ch)
 */
 void drawButton(const char* str,bool outlined)
 {
-	// Currently all our buttons use .3x of size of font
-	// anyway we can scale it by calling scalef before drawButton
-	// all values found by trial and error method
+    // Currently all our buttons use .3x of size of font
+    // anyway we can scale it by calling scalef before drawButton
+    // all values found by trial and error method
     float width=glutStrokeLength(GLUT_STROKE_ROMAN,(unsigned char*)str)*.3;
     float height=glutStrokeHeight(GLUT_STROKE_ROMAN)*.3;
     glColor3ub(0x42,0x42,0x42);
@@ -171,7 +171,7 @@ void drawButton(const char* str,bool outlined)
     glEnd();
     if(outlined)
     {
-    	// Draw outline if specified
+        // Draw outline if specified
         glColor3ub(0,0,0);
         glLineWidth(5);
         glBegin(GL_LINE_LOOP);
@@ -219,10 +219,10 @@ float getButtonHeight(const char* str)
 //return graphics scaled values for physics coordinates
 float getScaled(float val, bool x)
 {
-	if(x)
-		return val*B2_SCALEX + B2_OFFSETX;
+    if(x)
+        return val*B2_SCALEX + B2_OFFSETX;
 
-	return val*B2_SCALEY + B2_OFFSETY;
+    return val*B2_SCALEY + B2_OFFSETY;
 }
 
 void menuLoop()
@@ -297,8 +297,8 @@ void gameLoop()
     glBegin(GL_POLYGON);
     {
         //scoping so that these variables aren't accessible elsewhere
-    	float p00x = getScaled(R_physics::getPlayerX(), true);
-    	float p00y = getScaled(R_physics::getPlayerY(), false);
+        float p00x = getScaled(R_physics::getPlayerX(), true);
+        float p00y = getScaled(R_physics::getPlayerY(), false);
         float p01x = p00x;
         float p01y = getScaled(R_physics::getPlayerY()+R_physics::playerHeight*2.0, false);
         float p11x = getScaled(R_physics::getPlayerX()+R_physics::playerWidth*2.0, true);
@@ -306,7 +306,7 @@ void gameLoop()
         float p10x = p11x;
         float p10y = p00y;
 
-    	glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
+        glTexCoord2d(0,0);  glVertex2f(p00x, p00y);
         glTexCoord2d(0,1);  glVertex2f(p01x, p01y);
         glTexCoord2d(1,1);  glVertex2f(p11x, p11y);
         glTexCoord2d(1,0);  glVertex2f(p10x, p10y);

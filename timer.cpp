@@ -11,8 +11,8 @@ void timer(int value)
     if(R_states::STATE==R_states::GAME && value==UPDATE)
     {
 
-    	//Update physics
-		R_physics::stepPhysics();
+        //Update physics
+        R_physics::stepPhysics();
 
         R_physics::SCORE++;
         glutTimerFunc(12,timer,UPDATE);

@@ -12,3 +12,24 @@ The project is aimed at making the process of learning Morse code fun and intuit
 ### Abstract 
 
 The project is built as a 2d side scrolling game in openGL. It will consist of a main character whose objective is to avoid obstacles by jumping over them. The frequency of obstacles corresponds to the Morse representation of the letters shown on the screen. 
+
+### Prerequisities
+
+* freeglut
+* Box2D
+
+For Ubuntu 14.04 and above use the following command to install prerequisities
+```
+sudo apt-get install freeglut3-dev libbox2d2.3.0 libbox2d-dev
+```
+
+### Compiling
+
+For linux systems use compile.sh to compile.
+
+### Screenshots
+
+![screenshot](screenshots/screenshot1.png)
+![screenshot](screenshots/screenshot2.png)
+![screenshot](screenshots/screenshot3.png)
+![screenshot](screenshots/screenshot4.png)
