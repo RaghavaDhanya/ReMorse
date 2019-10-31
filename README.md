@@ -16,8 +16,8 @@ The project is built as a 2D side scrolling game using openGL. It consists of a 
 
 ## Prerequisities
 
-* freeglut
-* Box2D
+* [freeglut](http://freeglut.sourceforge.net/)
+* [Box2D](https://box2d.org/)
 
 For Ubuntu 14.04 and above use the following command to install prerequisities
 ```
